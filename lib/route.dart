@@ -7,6 +7,7 @@ import 'package:edudoro/pages/profile.dart';
 import 'package:edudoro/pages/setting.dart';
 import 'package:edudoro/pages/shop.dart';
 import 'package:edudoro/pages/sign_in.dart';
+import 'package:edudoro/pages/sign_up.dart';
 import 'package:edudoro/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +21,6 @@ class RouteApp extends StatelessWidget {
       theme: theme,
       routes: {
         "/": (context) => const LandingPage(),
-        "/sign_in": (context) => const SignInPage(),
         "/avatar_change": (context) => const AvatarChangePage(),
         "/friend": (context) => const FriendPage(),
         "/goal": (context) => const GoalPage(),
@@ -28,6 +28,8 @@ class RouteApp extends StatelessWidget {
         "/profile": (context) => const ProfilePage(),
         "/setting": (context) => const SettingPage(),
         "/shop": (context) => const ShopPage(),
+        "/sign_in": (context) => const SignInPage(),
+        "/sign_up": (context) => const SignUpPage(),
       },
     );
   }
