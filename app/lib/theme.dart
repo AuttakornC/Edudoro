@@ -1,5 +1,7 @@
 import 'package:edudoro/color.dart';
+import 'package:edudoro/components/util/svgIcon.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 final ThemeData theme = _buildTheme();
 
@@ -12,6 +14,14 @@ ThemeData _buildTheme() {
       secondary: secondary,
       background: background,
       error: destructive,
+    ),
+    scaffoldBackgroundColor: background,
+    appBarTheme: AppBarTheme(backgroundColor: background),
+    actionIconTheme: ActionIconThemeData(
+      backButtonIconBuilder: (context) => IconButton(
+        onPressed: () => Navigator.maybePop(context),
+        icon: SVGIcon(src: "assets/icons/BackIcon.svg"),
+      ),
     ),
   );
 }
