@@ -39,6 +39,13 @@ class _SignInForm extends State<SignInForm> {
   final TextEditingController _passwordController = TextEditingController();
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 364,
