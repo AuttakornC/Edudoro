@@ -3,29 +3,36 @@ import 'package:flutter/material.dart';
 class Button extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
-  final Color? color;
+  final Color? backgroundColor;
+  final TextStyle? textStyle;
+  final OutlinedBorder? shape;
 
   const Button({
     super.key,
     required this.label,
     required this.onPressed,
-    this.color,
+    this.backgroundColor,
+    this.textStyle,
+    this.shape,
   });
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveColor = color ?? Theme.of(context).colorScheme.primary;
+    final Color _backgroundColor =
+        backgroundColor ?? Theme.of(context).colorScheme.primary;
+    final OutlinedBorder _shape =
+        shape ?? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4));
 
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        backgroundColor: effectiveColor,
+        backgroundColor: _backgroundColor,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
         minimumSize: const Size(double.infinity, 0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        shape: _shape,
       ),
-      child: Text(label),
+      child: Text(label, style: textStyle),
     );
   }
 }
