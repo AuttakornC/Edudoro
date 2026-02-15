@@ -1,3 +1,4 @@
+import 'package:edudoro/color.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -5,6 +6,13 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "PROFILE",
+          style: const TextStyle(fontWeight: FontWeight.bold, color: primary),
+        ),
+      ),
+    );
   }
 }

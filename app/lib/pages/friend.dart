@@ -1,3 +1,4 @@
+import 'package:edudoro/color.dart';
 import 'package:flutter/material.dart';
 
 class FriendPage extends StatelessWidget {
@@ -5,6 +6,13 @@ class FriendPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "FRIENDS",
+          style: const TextStyle(fontWeight: FontWeight.bold, color: primary),
+        ),
+      ),
+    );
   }
 }
