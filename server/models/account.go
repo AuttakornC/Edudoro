@@ -8,6 +8,7 @@ import (
 type Account struct {
 	AccountId string `gorm:"column:account_id;primaryKey" json:"account_id"`
 	Email     string `gorm:"column:email;uniqueIndex" json:"email"`
+	Username  string `gorm:"column:username" json:"username"`
 	Password  string `gorm:"column:password" json:"password"`
 }
 
