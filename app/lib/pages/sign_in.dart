@@ -1,5 +1,11 @@
+import 'dart:convert';
+
 import 'package:edudoro/components/ui/button.dart';
+import 'package:edudoro/config.dart';
+import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart';
 
 class SignInPage extends StatelessWidget {
   const SignInPage({super.key});
@@ -37,6 +43,7 @@ class SignInForm extends StatefulWidget {
 class _SignInForm extends State<SignInForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -45,8 +52,68 @@ class _SignInForm extends State<SignInForm> {
     super.dispose();
   }
 
+  Future<void> _signIn(
+    BuildContext context,
+    String email,
+    String password,
+  ) async {
+    final url = Uri.parse("$SERVER_PATH/auth/sign-in");
+    try {
+      final response = await post(
+        url,
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode(<String, String>{
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        dynamic body = jsonDecode(response.body);
+        final token = body['data']?['token'];
+
+        if (token == null) {
+          toast("There're some problems. Sorry for mistake.");
+        }
+
+        final storage = FlutterSecureStorage();
+        await storage.write(key: 'jwt_token', value: token);
+        toast("Sign In success!!");
+        Navigator.of(context).pushNamed("/home");
+      } else if (response.statusCode == 404) {
+        toast("This account is not found,");
+      } else if (response.statusCode == 401) {
+        toast("Passwords do not match.");
+      } else {
+        toast("There're some problems. Sorry for mistake.");
+      }
+    } catch (e) {
+      toast("There're some problems. Sorry for mistake. $e");
+    }
+  }
+
+  void _setLoading(bool status) {
+    setState(() {
+      _isLoading = status;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    void onSubmit() async {
+      String email = _emailController.text;
+      String password = _passwordController.text;
+
+      if (password.length < 6) {
+        toast("Password must contain at least 6 characters.");
+        return;
+      }
+
+      _setLoading(true);
+      await _signIn(context, email, password);
+      _setLoading(false);
+    }
+
     return SizedBox(
       width: 364,
       child: Column(
@@ -55,7 +122,9 @@ class _SignInForm extends State<SignInForm> {
           TextField(
             controller: _emailController,
             decoration: InputDecoration(
-              border: OutlineInputBorder(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
               filled: true,
               fillColor: Theme.of(context).colorScheme.secondary,
               labelText: 'Email',
@@ -68,14 +137,16 @@ class _SignInForm extends State<SignInForm> {
             obscureText: true,
             enableSuggestions: false,
             decoration: InputDecoration(
-              border: OutlineInputBorder(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
               filled: true,
               fillColor: Theme.of(context).colorScheme.secondary,
               labelText: 'Password',
             ),
           ),
           SizedBox(height: 20),
-          Button(label: "Sign In", onPressed: () => {}),
+          Button(label: "Sign In", onPressed: _isLoading ? () => {} : onSubmit),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
