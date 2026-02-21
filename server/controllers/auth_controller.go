@@ -50,6 +50,7 @@ func AuthSignIn(c *gin.Context) {
 
 type signUpRequest struct {
 	Email    string `json:"email" binding:"required,email"`
+	Username string `json:"username" binding:"required,min=6"`
 	Password string `json:"password" binding:"required,min=6"`
 }
 
@@ -66,11 +67,12 @@ func AuthSignUp(c *gin.Context) {
 		return
 	}
 
-	newAccount := models.Account{Email: body.Email, Password: hashedPassword}
+	newAccount := models.Account{Email: body.Email, Password: hashedPassword, Username: body.Username}
 	result := models.DB.Create(&newAccount)
 
 	if result.Error != nil {
-		utils.RequestErrorHandlers(c, 500, result.Error)
+		utils.RequestErrorHandlers(c, http.StatusInternalServerError, result.Error)
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
