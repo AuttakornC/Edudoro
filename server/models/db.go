@@ -14,5 +14,5 @@ func ConnectDatabase() {
 	}
 	DB = database
 
-	DB.AutoMigrate(&Account{})
+	DB.AutoMigrate(&Account{}, &BoughtDecoration{}, &Decoration{}, &Friend{}, &Score{})
 }
