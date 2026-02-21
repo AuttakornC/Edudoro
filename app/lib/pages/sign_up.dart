@@ -1,10 +1,222 @@
+import 'dart:convert';
+
+import 'package:edudoro/components/ui/button.dart';
+import 'package:edudoro/config.dart';
+import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(48),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                child: Image.asset(
+                  "assets/edudoro-logo.png",
+                  fit: BoxFit.contain,
+                ),
+              ),
+              SignUpForm(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SignUpForm extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _SignUpForm();
+}
+
+class _SignUpForm extends State<SignUpForm> {
+  bool _isLoading = false;
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _signUp(
+    BuildContext context,
+    String username,
+    String email,
+    String password,
+  ) async {
+    final url = Uri.parse("$SERVER_PATH/auth/sign-up");
+    try {
+      final response = await post(
+        url,
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode(<String, String>{
+          'username': username,
+          'password': password,
+          'email': email,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        toast("Sign up success!!");
+        Navigator.of(context).pushNamed("/sign_in");
+      } else if (response.statusCode == 409) {
+        toast("This email already exists.");
+      } else {
+        toast("There're some problems. Sorry for mistake.");
+      }
+    } catch (err) {
+      toast("There're some problems. Sorry for mistake.");
+    }
+  }
+
+  void _loadingSet(bool status) {
+    setState(() {
+      _isLoading = status;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    void onSubmit() async {
+      String username = _usernameController.text;
+      String email = _emailController.text;
+      String password = _passwordController.text;
+      String confirmPassword = _confirmPasswordController.text;
+
+      List<String> lengthError = [];
+
+      if (username.length < 6) {
+        lengthError.add("Username");
+      }
+      if (password.length < 6) {
+        lengthError.add("Password");
+      }
+      if (confirmPassword.length < 6) {
+        lengthError.add("Confirm password");
+      }
+
+      if (lengthError.isNotEmpty) {
+        toast("${lengthError.join(", ")} must contain at least 6 characters.");
+        return;
+      }
+
+      if (password != confirmPassword) {
+        toast("Passwords do not match.");
+        return;
+      }
+
+      _loadingSet(true);
+      await _signUp(context, username, email, password);
+      _loadingSet(false);
+    }
+
+    return SizedBox(
+      width: 364,
+      child: Column(
+        children: [
+          SizedBox(height: 24),
+          TextField(
+            controller: _usernameController,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.secondary,
+              labelText: 'Username',
+            ),
+          ),
+          SizedBox(height: 20),
+          TextField(
+            controller: _emailController,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.secondary,
+              labelText: 'Email',
+            ),
+          ),
+          SizedBox(height: 20),
+          TextField(
+            controller: _passwordController,
+            autocorrect: false,
+            obscureText: true,
+            enableSuggestions: false,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.secondary,
+              labelText: 'Password',
+            ),
+          ),
+          SizedBox(height: 20),
+          TextField(
+            controller: _confirmPasswordController,
+            autocorrect: false,
+            obscureText: true,
+            enableSuggestions: false,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.secondary,
+              labelText: 'Confirm Password',
+            ),
+          ),
+          SizedBox(height: 20),
+          Button(label: "Sign Up", onPressed: _isLoading ? () => {} : onSubmit),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Already have an account?",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+              SizedBox(width: 6),
+              GestureDetector(
+                onTap: () => {Navigator.of(context).pushNamed("/sign_in")},
+                child: Text(
+                  "Sign In",
+                  style: TextStyle(
+                    decoration: TextDecoration.underline,
+                    decorationThickness: 2.0,
+                    decorationColor: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
