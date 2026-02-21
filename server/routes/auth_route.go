@@ -7,8 +7,6 @@ import (
 
 func authRouteSetup(r *gin.RouterGroup) {
 	authRoute := r.Group("/auth")
-	{
-		authRoute.POST("/sign-in", controllers.AuthSignIn)
-		authRoute.POST("/sign-up", controllers.AuthSignUp)
-	}
+	authRoute.POST("/sign-in", controllers.AuthSignIn)
+	authRoute.POST("/sign-up", controllers.AuthSignUp)
 }
