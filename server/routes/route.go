@@ -3,11 +3,19 @@ package routes
 import (
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowMethods = []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
+
+	r.Use(cors.New(config))
 
 	v1 := r.Group("/api/v1")
 	{
