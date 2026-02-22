@@ -13,6 +13,7 @@ ThemeData _buildTheme() {
       onPrimary: secondary,
       secondary: secondary,
       background: background,
+      surface: background, // Added to replace deprecated background
       error: destructive,
     ),
     scaffoldBackgroundColor: background,
