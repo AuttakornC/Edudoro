@@ -92,20 +92,22 @@ class _ShopPageState extends State<ShopPage> {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _SectionHeader(title: "Avatars"),
-            const SizedBox(height: 12),
-            _ItemGrid(items: _avatarItems, onBuy: _buy),
-            const SizedBox(height: 24),
-            _SectionHeader(title: "Frames"),
-            const SizedBox(height: 12),
-            _ItemGrid(items: _frameItems, onBuy: _buy),
-            const SizedBox(height: 24),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _SectionHeader(title: "Avatars"),
+              const SizedBox(height: 12),
+              _ItemGrid(items: _avatarItems, onBuy: _buy),
+              const SizedBox(height: 24),
+              _SectionHeader(title: "Frames"),
+              const SizedBox(height: 12),
+              _ItemGrid(items: _frameItems, onBuy: _buy),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );

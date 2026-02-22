@@ -51,48 +51,50 @@ class _SettingPageState extends State<SettingPage> {
           style: TextStyle(fontWeight: FontWeight.bold, color: primary),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Work Time:",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-                color: white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Work Time:",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: white,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            _TimeField(controller: _workController),
-            const SizedBox(height: 24),
-            const Text(
-              "Break Time:",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-                color: white,
+              const SizedBox(height: 12),
+              _TimeField(controller: _workController),
+              const SizedBox(height: 24),
+              const Text(
+                "Break Time:",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: white,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            _TimeField(controller: _breakController),
-            const Spacer(),
-            Button(
-              label: "SAVE",
-              onPressed: _save,
-              backgroundColor: primary,
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-                color: white,
+              const SizedBox(height: 12),
+              _TimeField(controller: _breakController),
+              const Spacer(),
+              Button(
+                label: "SAVE",
+                onPressed: _save,
+                backgroundColor: primary,
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: white,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );

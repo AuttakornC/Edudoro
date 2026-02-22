@@ -43,37 +43,39 @@ class _GoalPageState extends State<GoalPage> {
           style: TextStyle(fontWeight: FontWeight.bold, color: primary),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Goal For Tomorrow:",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-                color: white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Goal For Tomorrow:",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: white,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            _GoalField(controller: _goalController),
-            const Spacer(),
-            Button(
-              label: "SAVE",
-              onPressed: _save,
-              backgroundColor: primary,
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-                color: white,
+              const SizedBox(height: 12),
+              _GoalField(controller: _goalController),
+              const Spacer(),
+              Button(
+                label: "SAVE",
+                onPressed: _save,
+                backgroundColor: primary,
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: white,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
