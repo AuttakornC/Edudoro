@@ -138,6 +138,42 @@ class _ClockState extends State<Clock> with SingleTickerProviderStateMixin {
       padding: const EdgeInsets.all(48.0),
       child: Column(
         children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(124, 130, 0, 0),
+              borderRadius: BorderRadius.circular(40),
+            ),
+            child: const Text(
+              "Goal: Finished 1 Round",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: white,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          TextButton(
+            onPressed: () => {Navigator.of(context).pushNamed("/goal")},
+
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              "New Goal For Tomorrow +",
+              style: TextStyle(
+                fontSize: 14,
+                color: white,
+                decoration: TextDecoration.underline,
+                decorationColor: white,
+              ),
+            ),
+          ),
+          const SizedBox(height: 28),
           Stack(
             alignment: Alignment.center,
             children: [
