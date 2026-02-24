@@ -1,16 +1,90 @@
 import 'package:edudoro/color.dart';
 import 'package:flutter/material.dart';
 
+import '../components/util/svgIcon.dart';
+
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "PROFILE",
-          style: const TextStyle(fontWeight: FontWeight.bold, color: primary),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: primary,
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Center(
+            child: Column(
+              // mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 60),
+
+                Container(
+                  width: 129,
+                  height: 129,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colors.secondary,
+                  ),
+                  child: Center(
+                    child: SVGIcon(
+                      src: "assets/icons/ProfileIcon.svg",
+                      width: 60,
+                      height: 60,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                InkWell(
+                  onTap: () => Navigator.of(context).pushNamed("/avatar_change"),
+                  child: Text(
+                    "Edit",
+                    style: TextStyle(
+                      fontSize: 15,
+                      decoration: TextDecoration.underline,
+                      decorationColor: colors.onPrimary,
+                      decorationThickness: 2,
+                      fontWeight: FontWeight.bold,
+                      color: colors.onPrimary,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                Text(
+                  "Username",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: colors.primary,
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                Text(
+                  "example@example.com",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: colors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
