@@ -71,6 +71,10 @@ func AuthSignUp(c *gin.Context) {
 	result := models.DB.Create(&newAccount)
 
 	if result.Error != nil {
+		if models.ErrorIsDuplicate(result) {
+			utils.RequestErrorHandlers(c, http.StatusConflict, errors.New("account_conflict"))
+			return
+		}
 		utils.RequestErrorHandlers(c, http.StatusInternalServerError, result.Error)
 		return
 	}
