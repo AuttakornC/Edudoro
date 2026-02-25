@@ -21,6 +21,7 @@ func SetupRouter() *gin.Engine {
 	{
 		v1.GET("/health", func(c *gin.Context) { c.String(http.StatusOK, "Good!!") })
 		authRouteSetup(v1)
+		scoreRouteSetup(v1)
 	}
 
 	return r
