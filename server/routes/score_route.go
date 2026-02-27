@@ -9,7 +9,7 @@ import (
 func scoreRouteSetup(r *gin.RouterGroup) {
 	scoreRoute := r.Group("/score")
 
-	r.Use(middlewares.AuthMiddleware())
+	scoreRoute.Use(middlewares.AuthMiddleware())
 
 	scoreRoute.POST("/", controllers.ScoreIncrease)
 }
