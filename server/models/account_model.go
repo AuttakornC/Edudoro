@@ -17,7 +17,8 @@ type Account struct {
 
 	Decorations []BoughtDecoration `gorm:"foreignKey:AccountId;references:AccountId" json:"decorations"`
 
-	Friends []Friend `gorm:"foreignKey:RequesterId;references:AccountId" json:"friends"`
+	FriendsFromRequest   []Friend `gorm:"foreignKey:RequesterId;references:AccountId" json:"friends_from_request"`
+	FriendsFromAcception []Friend `gorm:"foreignKey:FriendId;references:AccountId" json:"friends_from_acception"`
 
 	Scores []Score `gorm:"foreignKey:AccountId;references:AccountId" json:"scores"`
 }
