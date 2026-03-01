@@ -15,7 +15,7 @@ type scoreIncreaseRequest struct {
 func ScoreIncrease(c *gin.Context) {
 	var body scoreIncreaseRequest
 
-	if !utils.RequestValidateBody(c, body) {
+	if !utils.RequestValidateBody(c, &body) {
 		return
 	}
 
