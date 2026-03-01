@@ -1,7 +1,7 @@
 import 'package:edudoro/color.dart';
-import 'package:edudoro/components/ui/button.dart';
+import 'package:edudoro/components/pages/home/home_clock.dart';
+import 'package:edudoro/components/pages/home/home_coin.dart';
 import 'package:edudoro/components/util/svgIcon.dart';
-import 'package:edudoro/utils/string.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -17,7 +17,47 @@ class HomePage extends StatelessWidget {
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [Clock()],
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(124, 130, 0, 0),
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    child: const Text(
+                      "Goal: Finished 1 Round",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  TextButton(
+                    onPressed: () => {Navigator.of(context).pushNamed("/goal")},
+
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      "New Goal For Tomorrow +",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: white,
+                        decoration: TextDecoration.underline,
+                        decorationColor: white,
+                      ),
+                    ),
+                  ),
+                  HomeClock(),
+                ],
               ),
             ),
             HomeFooter(),
@@ -73,163 +113,10 @@ class HomeFooter extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: () => {Navigator.of(context).pushNamed("/shop")},
-                icon: SVGIcon(src: "assets/icons/CartIcon.svg"),
-              ),
-              Text(
-                "9999",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                  color: yellow100,
-                ),
-              ),
-              SizedBox(width: 2),
-              SVGIcon(
-                src: "assets/icons/CoinIcon.svg",
-                color: yellow100,
-                width: 24,
-                height: 24,
-              ),
-            ],
-          ),
+          HomeCoin(),
           IconButton(
             onPressed: () => {Navigator.of(context).pushNamed("/setting")},
             icon: SVGIcon(src: "assets/icons/SettingIcon.svg"),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class Clock extends StatefulWidget {
-  const Clock({super.key});
-
-  @override
-  State<Clock> createState() => _ClockState();
-}
-
-class _ClockState extends State<Clock> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 25 * 60),
-    );
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(48.0),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(124, 130, 0, 0),
-              borderRadius: BorderRadius.circular(40),
-            ),
-            child: const Text(
-              "Goal: Finished 1 Round",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          TextButton(
-            onPressed: () => {Navigator.of(context).pushNamed("/goal")},
-
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text(
-              "New Goal For Tomorrow +",
-              style: TextStyle(
-                fontSize: 14,
-                color: white,
-                decoration: TextDecoration.underline,
-                decorationColor: white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 28),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    return CircularProgressIndicator(
-                      value: 1 - _animationController.value,
-                      strokeWidth: 16,
-                      backgroundColor: white,
-                    );
-                  },
-                ),
-              ),
-              AnimatedBuilder(
-                animation: _animationController,
-                builder: (context, child) {
-                  double value = _animationController.isAnimating
-                      ? ((1.0 - _animationController.value) * (25 * 60))
-                            .ceil()
-                            .toDouble()
-                      : 25 * 60;
-                  return Text(
-                    "${(value / 60).floor()}:${padZero((value % 60).toInt(), 2)}",
-                    style: const TextStyle(
-                      fontSize: 64,
-                      fontWeight: FontWeight.bold,
-                      color: primary,
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: 32),
-          Button(
-            label: _animationController.isAnimating ? "GIVE UP" : "START",
-            onPressed: () => {
-              setState(() {
-                if (_animationController.isAnimating) {
-                  _animationController.stop();
-                  _animationController.reset();
-                } else {
-                  _animationController.forward();
-                }
-              }),
-            },
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            textStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 24,
-            ),
           ),
         ],
       ),
