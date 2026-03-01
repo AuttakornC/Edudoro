@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:edudoro/components/ui/button.dart';
 import 'package:edudoro/config.dart';
+import 'package:edudoro/utils/http.dart';
 import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
@@ -35,6 +36,8 @@ class SignUpPage extends StatelessWidget {
 }
 
 class SignUpForm extends StatefulWidget {
+  const SignUpForm({super.key});
+
   @override
   State<StatefulWidget> createState() => _SignUpForm();
 }
@@ -62,21 +65,21 @@ class _SignUpForm extends State<SignUpForm> {
     String email,
     String password,
   ) async {
-    final url = Uri.parse("$SERVER_PATH/auth/sign-up");
     try {
-      final response = await post(
-        url,
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(<String, String>{
+      final response = await fetch(
+        "/auth/sign-up",
+        HTTPMethod.post,
+        body: <String, String>{
           'username': username,
           'password': password,
           'email': email,
-        }),
+        },
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         toast("Sign up success!!");
-        Navigator.of(context).pushNamed("/sign_in");
+        if (!context.mounted) return;
+        Navigator.pushNamed(context, "/sign_in");
       } else if (response.statusCode == 409) {
         toast("This email already exists.");
       } else {

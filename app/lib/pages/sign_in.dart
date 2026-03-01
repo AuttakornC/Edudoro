@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:edudoro/components/ui/button.dart';
-import 'package:edudoro/config.dart';
+import 'package:edudoro/utils/http.dart';
 import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart';
 
 class SignInPage extends StatelessWidget {
   const SignInPage({super.key});
@@ -36,6 +35,8 @@ class SignInPage extends StatelessWidget {
 }
 
 class SignInForm extends StatefulWidget {
+  const SignInForm({super.key});
+
   @override
   State<StatefulWidget> createState() => _SignInForm();
 }
@@ -57,15 +58,11 @@ class _SignInForm extends State<SignInForm> {
     String email,
     String password,
   ) async {
-    final url = Uri.parse("$SERVER_PATH/auth/sign-in");
     try {
-      final response = await post(
-        url,
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(<String, String>{
-          'email': email,
-          'password': password,
-        }),
+      final response = await fetch(
+        "/auth/sign-in",
+        HTTPMethod.post,
+        body: <String, String>{'email': email, 'password': password},
       );
 
       if (response.statusCode == 200) {
@@ -79,7 +76,8 @@ class _SignInForm extends State<SignInForm> {
         final storage = FlutterSecureStorage();
         await storage.write(key: 'jwt_token', value: token);
         toast("Sign In success!!");
-        Navigator.of(context).pushNamed("/home");
+        if (!context.mounted) return;
+        Navigator.pushNamed(context, "/home");
       } else if (response.statusCode == 404) {
         toast("This account is not found,");
       } else if (response.statusCode == 401) {
