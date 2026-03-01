@@ -7,6 +7,7 @@ import (
 	"github.com/AuttakornC/Edudoro/server/models"
 	"github.com/AuttakornC/Edudoro/server/utils"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type signInRequest struct {
@@ -71,7 +72,7 @@ func AuthSignUp(c *gin.Context) {
 	result := models.DB.Create(&newAccount)
 
 	if result.Error != nil {
-		if models.ErrorIsDuplicate(result) {
+		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
 			utils.RequestErrorHandlers(c, http.StatusConflict, errors.New("account_conflict"))
 			return
 		}

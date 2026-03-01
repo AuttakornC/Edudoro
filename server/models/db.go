@@ -1,8 +1,6 @@
 package models
 
 import (
-	"strings"
-
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -17,8 +15,4 @@ func ConnectDatabase() {
 	DB = database
 
 	DB.AutoMigrate(&Account{}, &BoughtDecoration{}, &Decoration{}, &Friend{}, &Score{})
-}
-
-func ErrorIsDuplicate(result *gorm.DB) bool {
-	return strings.Contains(result.Error.Error(), "duplicate")
 }
