@@ -1,6 +1,8 @@
 package middlewares
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 func ErrorHandleMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -11,7 +13,6 @@ func ErrorHandleMiddleware() gin.HandlerFunc {
 
 			c.JSON(c.Writer.Status(), gin.H{
 				"message": err.Error(),
-				"type":    err.Type,
 			})
 
 			c.Abort()
