@@ -3,6 +3,7 @@ package routes
 import (
 	"net/http"
 
+	"github.com/AuttakornC/Edudoro/server/middlewares"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,7 @@ func SetupRouter() *gin.Engine {
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
 
 	r.Use(cors.New(config))
+	r.Use(middlewares.ErrorHandleMiddleware())
 
 	v1 := r.Group("/api/v1")
 	{
