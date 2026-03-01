@@ -16,8 +16,9 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		token, found := strings.CutPrefix(authorization, "Bearer ")
 
-		if !found {
+		if authorization == "" || !found {
 			utils.RequestErrorHandlers(c, http.StatusUnauthorized, errors.New("unauthorized"))
+			c.Abort()
 			return
 		}
 
@@ -25,12 +26,14 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if err != nil {
 			utils.RequestErrorHandlers(c, http.StatusInternalServerError, err)
+			c.Abort()
 			return
 		}
 
 		claims, ok := payload.Claims.(jwt.MapClaims)
 		if !ok || !payload.Valid {
 			utils.RequestErrorHandlers(c, http.StatusUnauthorized, errors.New("unauthorized"))
+			c.Abort()
 			return
 		}
 
