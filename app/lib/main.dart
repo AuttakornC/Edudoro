@@ -1,6 +1,22 @@
+import 'package:edudoro/background_service.dart';
+import 'package:edudoro/providers/clock_setting_provider.dart';
+import 'package:edudoro/providers/coin_provider.dart';
 import 'package:edudoro/route.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const RouteApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await initializeService();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ClockSettingProvider()),
+        ChangeNotifierProvider(create: (_) => CoinProvider()),
+      ],
+      child: const RouteApp(),
+    ),
+  );
 }
