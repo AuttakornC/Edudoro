@@ -79,5 +79,5 @@ func AuthSignUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusCreated, gin.H{"message": "success"})
 }
