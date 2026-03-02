@@ -169,3 +169,56 @@ func FriendRequestQuery(c *gin.Context) {
 		"data":    responseBody,
 	})
 }
+
+type friendRequestResponseBody struct {
+	RequestId string `json:"request_id" binding:"required"`
+}
+
+func FriendRequestResponse(c *gin.Context) {
+	var body friendRequestResponseBody
+
+	if !utils.RequestValidateBody(c, &body) {
+		return
+	}
+
+	accountId, _ := c.Get("account_id")
+
+	now := time.Now().Truncate(time.Millisecond)
+
+	result := models.DB.Model(&models.Friend{}).
+		Where("requester_id = ? AND friend_id = ? AND accepted_at IS NULL", body.RequestId, accountId).
+		Update("accepted_at", now)
+
+	if result.Error != nil {
+		utils.RequestErrorHandlers(c, http.StatusInternalServerError, result.Error)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		utils.RequestErrorHandlers(c, http.StatusNotFound, errors.New("request_not_found"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success"})
+}
+
+func FriendRequestDenied(c *gin.Context) {
+	requestId := c.Param("request_id")
+
+	accountId, _ := c.Get("account_id")
+
+	result := models.DB.Where("requester_id = ? AND friend_id = ?", requestId, accountId).
+		Delete(&models.Friend{})
+
+	if result.Error != nil {
+		utils.RequestErrorHandlers(c, http.StatusInternalServerError, result.Error)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		utils.RequestErrorHandlers(c, http.StatusNotFound, errors.New("request_not_found"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success"})
+}
