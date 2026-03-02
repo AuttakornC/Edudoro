@@ -12,10 +12,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type friendAcceptResponseBody struct {
-	FriendId   string    `json:"friend_account_id"`
-	DailyScore int       `json:"daily_score"`
-	FriendAt   time.Time `json:"friend_at"`
+type friendDecoration struct {
+	Type   models.DecorationType `json:"type"`
+	Detail string                `json:"detail"`
+}
+
+type friendAcceptResponse struct {
+	FriendId    string             `json:"friend_account_id"`
+	DailyScore  int                `json:"daily_score"`
+	Username    string             `json:"username"`
+	Decorations []friendDecoration `json:"decorations"`
+	FriendAt    time.Time          `json:"friend_at"`
 }
 
 func FriendAcceptedQuery(c *gin.Context) {
@@ -28,9 +35,13 @@ func FriendAcceptedQuery(c *gin.Context) {
 	err := models.DB.Preload("FriendsFromRequest", "accepted_at IS NOT NULL").
 		Preload("FriendsFromRequest.Friend").
 		Preload("FriendsFromRequest.Friend.Scores", "created_at >= ?", today).
+		Preload("FriendsFromRequest.Friend.Decorations", "used = ?", true).
+		Preload("FriendsFromRequest.Friend.Decorations.Decoration").
 		Preload("FriendsFromAcception", "accepted_at IS NOT NULL").
 		Preload("FriendsFromAcception.Requester").
 		Preload("FriendsFromAcception.Requester.Scores", "created_at >= ?", today).
+		Preload("FriendsFromRequest.Requester.Decorations", "used = ?", true).
+		Preload("FriendsFromRequest.Requester.Decorations.Decoration").
 		First(&account, "account_id = ?", accountId).Error
 
 	if err != nil {
@@ -38,14 +49,18 @@ func FriendAcceptedQuery(c *gin.Context) {
 		return
 	}
 
-	var FriendsList []friendAcceptResponseBody
+	var FriendsList []friendAcceptResponse
 
 	for _, friend := range account.FriendsFromRequest {
 		var friendTodayScore int = 0
 		for _, scoreHistory := range friend.Friend.Scores {
 			friendTodayScore += scoreHistory.Score
 		}
-		FriendsList = append(FriendsList, friendAcceptResponseBody{FriendId: friend.FriendId, FriendAt: *friend.AcceptedAt, DailyScore: friendTodayScore})
+		var decorations []friendDecoration
+		for _, decoration := range friend.Friend.Decorations {
+			decorations = append(decorations, friendDecoration{Type: decoration.Decoration.Type, Detail: decoration.Decoration.Detail})
+		}
+		FriendsList = append(FriendsList, friendAcceptResponse{FriendId: friend.FriendId, FriendAt: *friend.AcceptedAt, DailyScore: friendTodayScore, Username: friend.Friend.Username, Decorations: decorations})
 	}
 
 	for _, friend := range account.FriendsFromAcception {
@@ -53,10 +68,14 @@ func FriendAcceptedQuery(c *gin.Context) {
 		for _, scoreHistory := range friend.Requester.Scores {
 			friendTodayScore += scoreHistory.Score
 		}
-		FriendsList = append(FriendsList, friendAcceptResponseBody{FriendId: friend.RequesterId, FriendAt: *friend.AcceptedAt, DailyScore: friendTodayScore})
+		var decorations []friendDecoration
+		for _, decoration := range friend.Requester.Decorations {
+			decorations = append(decorations, friendDecoration{Type: decoration.Decoration.Type, Detail: decoration.Decoration.Detail})
+		}
+		FriendsList = append(FriendsList, friendAcceptResponse{FriendId: friend.RequesterId, FriendAt: *friend.AcceptedAt, DailyScore: friendTodayScore, Username: friend.Requester.Username, Decorations: decorations})
 	}
 
-	slices.SortFunc(FriendsList, func(a, b friendAcceptResponseBody) int {
+	slices.SortFunc(FriendsList, func(a, b friendAcceptResponse) int {
 		return b.DailyScore - a.DailyScore
 	})
 
@@ -128,15 +147,10 @@ func FriendRequest(c *gin.Context) {
 
 }
 
-type friendRequestQueryDecoration struct {
-	Type   models.DecorationType `json:"type"`
-	Detail string                `json:"detail"`
-}
-
 type friendRequestQueryResponse struct {
-	RequestId   string                         `json:"request_id"`
-	Username    string                         `json:"username"`
-	Decorations []friendRequestQueryDecoration `json:"decorations"`
+	RequestId   string             `json:"requester_id"`
+	Username    string             `json:"username"`
+	Decorations []friendDecoration `json:"decorations"`
 }
 
 func FriendRequestQuery(c *gin.Context) {
@@ -157,9 +171,9 @@ func FriendRequestQuery(c *gin.Context) {
 	var responseBody []friendRequestQueryResponse
 
 	for _, friendRequest := range friendsRequest {
-		var decorations []friendRequestQueryDecoration
+		var decorations []friendDecoration
 		for _, decoration := range friendRequest.Requester.Decorations {
-			decorations = append(decorations, friendRequestQueryDecoration{Type: decoration.Decoration.Type, Detail: decoration.Decoration.Detail})
+			decorations = append(decorations, friendDecoration{Type: decoration.Decoration.Type, Detail: decoration.Decoration.Detail})
 		}
 		responseBody = append(responseBody, friendRequestQueryResponse{RequestId: friendRequest.RequesterId, Username: friendRequest.Requester.Username, Decorations: decorations})
 	}
@@ -171,7 +185,7 @@ func FriendRequestQuery(c *gin.Context) {
 }
 
 type friendRequestResponseBody struct {
-	RequestId string `json:"request_id" binding:"required"`
+	RequestId string `json:"requester_id" binding:"required"`
 }
 
 func FriendRequestResponse(c *gin.Context) {
