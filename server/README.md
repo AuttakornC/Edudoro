@@ -56,6 +56,30 @@ response:
 }
 ```
 
+### - Search Friend
+
+````bash
+GET /api/v1/friends/request
+
+request:
+authRequire - true
+searchParams: {
+  'search': string # a part of username
+}
+
+response:
+200 - {
+  'message': 'success'
+}
+
+404 - {
+  'message': 'user_not_found'
+}
+
+500 - {
+  'message': string # system error
+}
+
 ### - Create request
 
 ```bash
@@ -65,7 +89,7 @@ request:
 authRequire - true
 header - { 'Content-Type': 'application/json' }
 body - {
-  'username': string;
+  'friend_id': string;
 }
 
 response:
@@ -88,7 +112,7 @@ response:
 500 - {
   'message': string # system error
 }
-```
+````
 
 ### - Accept request
 

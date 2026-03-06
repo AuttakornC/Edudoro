@@ -86,7 +86,7 @@ func FriendAcceptedQuery(c *gin.Context) {
 }
 
 type friendRequestRequestBody struct {
-	UserName string `json:"username" binding:"required"`
+	FriendId string `json:"friend_id" binding:"required"`
 }
 
 func FriendRequest(c *gin.Context) {
@@ -98,7 +98,7 @@ func FriendRequest(c *gin.Context) {
 
 	var friendAccount models.Account
 
-	err := models.DB.Select("account_id").Where("username = ?", body.UserName).First(&friendAccount).Error
+	err := models.DB.Select("account_id").Where("account_id = ?", body.FriendId).First(&friendAccount).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -235,4 +235,45 @@ func FriendRequestDenied(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
+}
+
+type friendSearchResponseBody struct {
+	FriendId    string             `json:"friend_id"`
+	Username    string             `json:"username"`
+	Decorations []friendDecoration `json:"decorations"`
+}
+
+func FriendSearch(c *gin.Context) {
+	search := c.Query("search")
+	if search == "" {
+		utils.RequestErrorHandlers(c, http.StatusNotFound, errors.New("user_not_found"))
+		return
+	}
+
+	var friends []models.Account
+
+	err := models.DB.Model(&models.Account{}).Preload("Decorations", "used = ?", true).
+		Preload("Decorations.Decoration").Where("username LIKE ?", "%"+search+"%").Limit(3).Find(&friends).Error
+	if err != nil {
+		utils.RequestErrorHandlers(c, http.StatusInternalServerError, err)
+	}
+
+	if len(friends) == 0 {
+		utils.RequestErrorHandlers(c, http.StatusNotFound, errors.New("user_not_found"))
+		return
+	}
+
+	var friendsResponseBody []friendSearchResponseBody
+	for _, friend := range friends {
+		var friendDecorations []friendDecoration
+		for _, decoration := range friend.Decorations {
+			friendDecorations = append(friendDecorations, friendDecoration{Type: decoration.Decoration.Type, Detail: decoration.Decoration.Detail})
+		}
+		friendsResponseBody = append(friendsResponseBody, friendSearchResponseBody{FriendId: friend.AccountId, Username: friend.Username, Decorations: friendDecorations})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data":    friendsResponseBody,
+	})
 }

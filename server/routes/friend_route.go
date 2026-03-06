@@ -13,6 +13,7 @@ func friendRouteSetup(r *gin.RouterGroup) {
 
 	friendRoute.GET("", controllers.FriendAcceptedQuery)
 	friendRoute.GET("/requests", controllers.FriendRequestQuery)
+	friendRoute.GET("/request", controllers.FriendAcceptedQuery)
 	friendRoute.POST("/request", controllers.FriendRequest)
 	friendRoute.PATCH("/request", controllers.FriendRequestResponse)
 	friendRoute.DELETE("/request/:request_id", controllers.FriendRequestDenied)
