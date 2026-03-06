@@ -4,7 +4,7 @@ import 'package:edudoro/config.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 
-enum HTTPMethod { post, get, put, delete }
+enum HTTPMethod { post, get, put, delete, patch }
 
 Future<Response> fetch(
   String url,
@@ -39,6 +39,13 @@ Future<Response> fetch(
   } else if (method == HTTPMethod.put) {
     requestHeaders.putIfAbsent('Content-Type', () => 'application/json');
     return put(
+      uri,
+      headers: requestHeaders,
+      body: jsonEncode(body ?? <String, String>{}),
+    );
+  } else if (method == HTTPMethod.patch) {
+    requestHeaders.putIfAbsent('Content-Type', () => 'application/json');
+    return patch(
       uri,
       headers: requestHeaders,
       body: jsonEncode(body ?? <String, String>{}),

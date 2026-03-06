@@ -1,8 +1,16 @@
+import 'dart:convert';
+
 import 'package:edudoro/color.dart';
 import 'package:flutter/material.dart';
 
+import 'package:edudoro/utils/http.dart';
+import 'package:edudoro/utils/toast.dart';
+
 import '../components/ui/friend_list_tile.dart';
 import '../components/ui/friend_req_list_tile.dart';
+
+// Types
+import '../types/friends.dart';
 
 // TODO(4KV6): Implement friend page feature.
 // - Show friend list
@@ -11,14 +19,14 @@ import '../components/ui/friend_req_list_tile.dart';
 
 // mock data for add friend form
 var mockUserData = [
-  {"id": 1, "username": "Alice", "score": 1500, "status": "Online"},
-  {"id": 2, "username": "Bob", "score": 1200, "status": "Offline"},
+  {"id": 1, "username": "Alice5", "score": 1500, "status": "Online"},
+  {"id": 2, "username": "Bob444", "score": 1200, "status": "Offline"},
   {"id": 3, "username": "Charlie", "score": 1800, "status": "Online"},
-  {"id": 4, "username": "David", "score": 1100, "status": "Offline"},
-  {"id": 5, "username": "Eve", "score": 1300, "status": "Online"},
-  {"id": 6, "username": "Frank", "score": 1400, "status": "Offline"},
-  {"id": 7, "username": "Grace", "score": 1600, "status": "Online"},
-  {"id": 8, "username": "Heidi", "score": 1700, "status": "Offline"},
+  {"id": 4, "username": "David1", "score": 1100, "status": "Offline"},
+  {"id": 5, "username": "Eve333", "score": 1300, "status": "Online"},
+  {"id": 6, "username": "Frank2", "score": 1400, "status": "Offline"},
+  {"id": 7, "username": "Grace2", "score": 1600, "status": "Online"},
+  {"id": 8, "username": "Heidi2", "score": 1700, "status": "Offline"},
 ];
 
 class FriendPage extends StatelessWidget {
@@ -47,13 +55,100 @@ class FriendPageView extends StatefulWidget {
 
 class _FriendPageView extends State<FriendPageView> {
   int _selectedIndex = 0;
+  bool _isLoadingfriends = true;
+  bool _isLoadingFriendRequests = true;
+
+  final List<FriendsType> _friends = [];
+  final List<FriendsRequestType> _friendRequests = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchFriends();
+    _fetchFriendRequests();
+  }
+
+  Future<void> _fetchFriends() async {
+    setState(() {
+      _isLoadingfriends = true;
+    });
+    try {
+      final response = await fetch("/friends", HTTPMethod.get, withAuth: true);
+      if (response.statusCode == 200) {
+        // Parse response and update _friends list.
+        final List<dynamic> body = jsonDecode(response.body)['data'] ?? [];
+        final List<FriendsType> friends = body
+            .map((item) => FriendsType.fromJson(item))
+            .toList();
+        setState(() {
+          _friends.clear();
+          _friends.addAll(friends);
+        });
+      } else {
+        final errorMessage =
+            jsonDecode(response.body)['message'] ?? 'Unknown error';
+        toast("Failed to load friends: ${response.statusCode}\n$errorMessage");
+      }
+    } catch (e) {
+      toast("Failed to load friends: $e");
+    }
+    setState(() {
+      _isLoadingfriends = false;
+    });
+  }
+
+  Future<void> _fetchFriendRequests() async {
+    setState(() {
+      _isLoadingFriendRequests = true;
+    });
+    try {
+      final response = await fetch(
+        "/friends/requests",
+        HTTPMethod.get,
+        withAuth: true,
+      );
+      if (response.statusCode == 200) {
+        // Parse response and update _friendRequests list.
+        final List<dynamic> body = jsonDecode(response.body)['data'] ?? [];
+        print("Friend requests response body: $body");
+        final List<FriendsRequestType> friendRequests = body
+            .map((item) => FriendsRequestType.fromJson(item))
+            .toList();
+        setState(() {
+          _friendRequests.clear();
+          _friendRequests.addAll(friendRequests);
+        });
+      } else {
+        final errorMessage =
+            jsonDecode(response.body)['message'] ?? 'Unknown error';
+        toast(
+          "Failed to load friend requests: ${response.statusCode}\n$errorMessage",
+        );
+      }
+    } catch (e) {
+      toast("Failed to load friend requests: $e");
+    }
+    setState(() {
+      _isLoadingFriendRequests = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: [FriendList(), FriendRequestList()],
+        children: [
+          FriendList(friends: _friends, isLoading: _isLoadingfriends),
+          FriendRequestList(
+            friendRequests: _friendRequests,
+            isLoading: _isLoadingFriendRequests,
+            onRequestHandled: () {
+              _fetchFriends();
+              _fetchFriendRequests();
+            },
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
@@ -79,19 +174,35 @@ class _FriendPageView extends State<FriendPageView> {
 }
 
 class FriendList extends StatelessWidget {
-  const FriendList({super.key});
+  final List<FriendsType> friends;
+  final bool isLoading;
+
+  const FriendList({super.key, required this.friends, required this.isLoading});
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (friends.isEmpty && !isLoading) {
+      return Center(
+        child: Text(
+          "No friends yet. Add some friends to see them here!",
+          style: TextStyle(fontSize: 16, color: secondary),
+        ),
+      );
+    }
+
     return ListView.builder(
-      itemCount: 10,
+      itemCount: friends.length,
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: FriendListTile(
-            username: "Friend ${index + 1}",
+            username: friends[index].username,
             status: "Online",
-            score: index * 100,
+            score: friends[index].daily_score,
             onUnfriend: () {
               // TODO(4KV6): Implement unfriend functionality.
             },
@@ -103,24 +214,94 @@ class FriendList extends StatelessWidget {
 }
 
 class FriendRequestList extends StatelessWidget {
-  const FriendRequestList({super.key});
+  final List<FriendsRequestType> friendRequests;
+  final bool isLoading;
+  final VoidCallback? onRequestHandled;
+
+  const FriendRequestList({
+    super.key,
+    required this.friendRequests,
+    required this.isLoading,
+    required this.onRequestHandled,
+  });
+
+  Future<void> _acceptFriendRequest(String requesterId) async {
+    try {
+      final response = await fetch(
+        "/friends/request",
+        HTTPMethod.patch,
+        withAuth: true,
+        headers: {"Content-Type": "application/json"},
+        body: {"requester_id": requesterId},
+      );
+
+      if (response.statusCode == 200) {
+        toast("Friend request accepted!");
+        onRequestHandled?.call();
+      } else {
+        final errorMessage =
+            jsonDecode(response.body)['message'] ?? 'Unknown error';
+        toast(
+          "Failed to accept friend request: ${response.statusCode}\n$errorMessage",
+        );
+      }
+    } catch (e) {
+      toast("Failed to accept friend request: $e");
+    }
+  }
+
+  Future<void> _rejectFriendRequest(String requesterId) async {
+    try {
+      final response = await fetch(
+        "/friends/request/$requesterId",
+        HTTPMethod.delete,
+        withAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        toast("Friend request rejected!");
+        onRequestHandled?.call();
+      } else {
+        final errorMessage =
+            jsonDecode(response.body)['message'] ?? 'Unknown error';
+        toast(
+          "Failed to reject friend request: ${response.statusCode}\n$errorMessage",
+        );
+      }
+    } catch (e) {
+      toast("Failed to reject friend request: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (friendRequests.isEmpty && !isLoading) {
+      return Center(
+        child: Text(
+          "No friend requests yet.",
+          style: TextStyle(fontSize: 16, color: secondary),
+        ),
+      );
+    }
+
     return ListView.builder(
-      itemCount: 5, // TODO(4KV6): Replace with actual friend request count.
+      itemCount: friendRequests.length,
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: FriendRequestListTile(
-            username: "User ${index + 1}",
+            username: friendRequests[index].username,
             time:
                 "2024-06-01 12:00", // TODO(4KV6): Replace with actual request time.
             onAccept: () {
-              // TODO(4KV6): Implement accept friend request functionality.
+              _acceptFriendRequest(friendRequests[index].requester_id);
             },
             onReject: () {
-              // TODO(4KV6): Implement reject friend request functionality.
+              _rejectFriendRequest(friendRequests[index].requester_id);
             },
           ),
         );
@@ -141,6 +322,7 @@ class _AddFriendForm extends State<AddFriendForm> {
   List<Map<String, dynamic>> _searchResults = [];
   bool _isAddButtonDisabled = true;
   int? _selectedUserId;
+  String? _selectedUsername;
 
   @override
   void initState() {
@@ -173,6 +355,35 @@ class _AddFriendForm extends State<AddFriendForm> {
     _usernameController.removeListener(_onUsernameChanged);
     _usernameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _addFriend() async {
+    if (_selectedUserId == null) return;
+
+    try {
+      final response = await fetch(
+        "/friends/request",
+        HTTPMethod.post,
+        withAuth: true,
+        headers: {"Content-Type": "application/json"},
+        body: {"username": _selectedUsername},
+      );
+
+      if (response.statusCode == 200) {
+        toast("Friend request sent to $_selectedUsername!");
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      } else {
+        final errorMessage =
+            jsonDecode(response.body)['message'] ?? 'Unknown error';
+        toast(
+          "Failed to send friend request: ${response.statusCode}\n$errorMessage",
+        );
+      }
+    } catch (e) {
+      toast("Failed to send friend request: $e");
+    }
   }
 
   @override
@@ -211,6 +422,7 @@ class _AddFriendForm extends State<AddFriendForm> {
                         onTap: () {
                           setState(() {
                             _selectedUserId = user["id"];
+                            _selectedUsername = user["username"];
                             _isAddButtonDisabled = false;
                           });
                         },
@@ -228,7 +440,7 @@ class _AddFriendForm extends State<AddFriendForm> {
               ? null
               : () {
                   // TODO(4KV6): Implement add friend functionality.
-                  Navigator.of(context).pop();
+                  _addFriend();
                 },
           child: Text("Add"),
         ),
