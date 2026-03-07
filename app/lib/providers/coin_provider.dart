@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:edudoro/utils/http.dart';
+import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
 
 class CoinProvider extends ChangeNotifier {
@@ -13,6 +17,21 @@ class CoinProvider extends ChangeNotifier {
 
   Future<void> _loadCoin() async {
     _setLoading(true);
+    try {
+      final response = await fetch("/score", HTTPMethod.get);
+      final body = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final score = body['data']?['score'];
+        if (score != null) {
+          _coin = score;
+        }
+      } else {
+        final msg = body['message'];
+        toast("Something went wrong. $msg");
+      }
+    } catch (e) {
+      toast("Something went wrong. $e");
+    }
     _setLoading(false);
   }
 
