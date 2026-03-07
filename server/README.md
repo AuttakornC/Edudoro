@@ -102,12 +102,12 @@ response:
   'message': string # bad request
 }
 
-409 - {
-  'message': 'already_requested'
-}
-
 404 - {
   'message': 'user_not_found'
+}
+
+409 - {
+  'message': 'already_requested'
 }
 
 500 - {
