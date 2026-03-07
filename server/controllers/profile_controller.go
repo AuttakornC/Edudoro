@@ -78,14 +78,23 @@ func ProfileGetAllDecorations(c *gin.Context) {
 	})
 }
 
+type profileUseDecocationRequestBody struct {
+	DecorationId string `json:"decoration_id" binding:"required"`
+}
+
 func ProfileUseDecocation(c *gin.Context) {
-	decorationId := c.Param("decoration_id")
+	var body profileUseDecocationRequestBody
+
+	if !utils.RequestValidateBody(c, &body) {
+		return
+	}
+
 	accountId, _ := c.Get("account_id")
 
 	err := models.DB.Transaction(func(tx *gorm.DB) error {
 		var decoration models.Decoration
 
-		err := tx.Where("decoration_id = ?", decorationId).First(&decoration).Error
+		err := tx.Where("decoration_id = ?", body.DecorationId).First(&decoration).Error
 		if err != nil {
 			return err
 		}
@@ -97,7 +106,7 @@ func ProfileUseDecocation(c *gin.Context) {
 			return result.Error
 		}
 
-		result = query.Where("account_id = ?", accountId).Where("decoration_id = ?", decorationId).Update("used", true)
+		result = query.Where("account_id = ?", accountId).Where("decoration_id = ?", body.DecorationId).Update("used", true)
 		if result.Error != nil {
 			return result.Error
 		}
