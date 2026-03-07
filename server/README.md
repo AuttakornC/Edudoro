@@ -58,7 +58,7 @@ response:
 
 ### - Search Friend
 
-````bash
+```bash
 GET /api/v1/friends/request
 
 request:
@@ -79,6 +79,7 @@ response:
 500 - {
   'message': string # system error
 }
+```
 
 ### - Create request
 
@@ -112,7 +113,7 @@ response:
 500 - {
   'message': string # system error
 }
-````
+```
 
 ### - Accept request
 
@@ -159,6 +160,82 @@ response:
 
 404 - {
   'message': 'request_not_found'
+}
+
+500 - {
+  'message': string # system error
+}
+```
+
+## Shop
+
+### - Query All Shop Items
+
+```bash
+GET /api/v1/shop/decorations
+
+request:
+authRequire - optional
+
+
+response:
+200 - {
+  'message': 'success',
+  'data': {
+    'icons': {
+      'decoration_id': string,
+      'detail': string,
+      'owned': bool
+    }[],
+    'frames': {
+      'decoration_id': string,
+      'detail': string,
+      'owned': bool
+    }[],
+    'name_colors': {
+      'decoration_id': string,
+      'detail': string,
+      'owned': bool
+    }[]
+  }
+}
+
+500 - {
+  'message': string # system error
+}
+```
+
+### - Bought decoration
+
+```bash
+POST /api/v1/shop/buy
+
+request:
+authRequire - true
+header - { 'Content-Type': 'application/json' }
+body - {
+  'decoration_id': string;
+}
+
+response:
+201 - {
+  'message': 'success'
+}
+
+400 - {
+  'message': string # bad request
+}
+
+402 - {
+  'message': 'not_enough_score'
+}
+
+404 - {
+  'message': 'decoration_not_found'
+}
+
+409 - {
+  'message': 'already_bought'
 }
 
 500 - {

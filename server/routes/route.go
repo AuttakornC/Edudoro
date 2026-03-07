@@ -25,6 +25,7 @@ func SetupRouter() *gin.Engine {
 		authRouteSetup(v1)
 		scoreRouteSetup(v1)
 		friendRouteSetup(v1)
+		shopRouteSetup(v1)
 	}
 
 	return r
