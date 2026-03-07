@@ -242,3 +242,78 @@ response:
   'message': string # system error
 }
 ```
+
+## Profile
+
+### Current using decorations
+
+```bash
+GET /api/v1/profile
+
+request:
+authRequire - true
+
+
+response:
+200 - {
+  'message': 'success',
+  'data': {
+    'decoration_id': string,
+    'type': 'icon' | 'frame' | 'name_color',
+    'detail': string,
+    'bought_at': Date
+  }[]
+}
+
+500 - {
+  'message': string # system error
+}
+```
+
+### Query all user's decorations
+
+```bash
+GET /api/v1/profile/decorations
+
+request:
+authRequire - true
+
+
+response:
+200 - {
+  'message': 'success',
+  'data': {
+    'decoration_id': string,
+    'type': 'icon' | 'frame' | 'name_color',
+    'detail': string,
+    'bought_at': Date
+  }[]
+}
+
+500 - {
+  'message': string # system error
+}
+```
+
+### Use the decorations
+
+```bash
+GET /api/v1/profile/use/:decoration_id
+
+request:
+authRequire - true
+
+
+response:
+200 - {
+  'message': 'success',
+}
+
+404 = {
+  'message': 'decoration_not_found'
+}
+
+500 - {
+  'message': string # system error
+}
+```
