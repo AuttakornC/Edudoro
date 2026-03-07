@@ -1,3 +1,20 @@
+/*
+File: friend.dart
+Description: This file contains the implementation of the FriendPage, 
+which allows users to view their friends list, 
+manage friend requests, and add new friends. 
+It includes the FriendList and FriendRequestList components, 
+as well as the AddFriendForm for searching and sending friend requests.
+
+Responsibilities:
+- Fetch and display the user's friends list.
+- Fetch and display friend requests.
+- Allow users to send and manage friend requests.
+
+Author: 4KV6
+Course: Mobile Application Development Frameworks
+*/
+
 import 'dart:convert';
 
 import 'package:edudoro/color.dart';
@@ -12,23 +29,19 @@ import '../components/ui/friend_req_list_tile.dart';
 // Types
 import '../types/friends.dart';
 
-// TODO(4KV6): Implement friend page feature.
-// - Show friend list
-// - Show friend request list
-// - Add friend by username
-
 // mock data for add friend form
-var mockUserData = [
-  {"id": 1, "username": "Alice5", "score": 1500, "status": "Online"},
-  {"id": 2, "username": "Bob444", "score": 1200, "status": "Offline"},
-  {"id": 3, "username": "Charlie", "score": 1800, "status": "Online"},
-  {"id": 4, "username": "David1", "score": 1100, "status": "Offline"},
-  {"id": 5, "username": "Eve333", "score": 1300, "status": "Online"},
-  {"id": 6, "username": "Frank2", "score": 1400, "status": "Offline"},
-  {"id": 7, "username": "Grace2", "score": 1600, "status": "Online"},
-  {"id": 8, "username": "Heidi2", "score": 1700, "status": "Offline"},
-];
+// var mockUserData = [
+//   {"id": 1, "username": "Alice5", "score": 1500, "status": "Online"},
+//   {"id": 2, "username": "Bob444", "score": 1200, "status": "Offline"},
+//   {"id": 3, "username": "Charlie", "score": 1800, "status": "Online"},
+//   {"id": 4, "username": "David1", "score": 1100, "status": "Offline"},
+//   {"id": 5, "username": "Eve333", "score": 1300, "status": "Online"},
+//   {"id": 6, "username": "Frank2", "score": 1400, "status": "Offline"},
+//   {"id": 7, "username": "Grace2", "score": 1600, "status": "Online"},
+//   {"id": 8, "username": "Heidi2", "score": 1700, "status": "Offline"},
+// ];
 
+/// The `FriendPage` widget is the main entry point for the friends feature.
 class FriendPage extends StatelessWidget {
   const FriendPage({super.key});
 
@@ -46,6 +59,21 @@ class FriendPage extends StatelessWidget {
   }
 }
 
+/// The `FriendPageView` widget manages the state and logic for the friends page,
+/// including fetching friends and friend requests, and handling user interactions.
+///
+/// It uses an `IndexedStack` to switch between the friends list and friend request list,
+/// and a `BottomNavigationBar` for navigation.
+///
+/// The `FloatingActionButton` is used to open the `AddFriendForm` dialog for adding new friends.
+///
+/// The `AddFriendForm` is displayed as a dialog when the user taps the floating action button to add a new friend.
+///
+/// The `FriendList` and `FriendRequestList` components are responsible for displaying the respective lists of friends and friend requests,
+/// and handling user interactions such as accepting or rejecting friend requests, and unfriending users.
+///
+/// The `FriendListTile` and `FriendRequestListTile` components are used to display individual friend and friend request items in the lists, respectively.
+/// The page also includes error handling and loading states to provide feedback to the user during API interactions.
 class FriendPageView extends StatefulWidget {
   const FriendPageView({super.key});
 
@@ -68,6 +96,22 @@ class _FriendPageView extends State<FriendPageView> {
     _fetchFriendRequests();
   }
 
+  /// Fetches the list of friends from the API and updates the state accordingly.
+  ///
+  /// Handles loading state and error messages to provide feedback to the user.
+  ///
+  /// On success, it parses the response and updates the `_friends` list with the retrieved data.
+  ///
+  /// On failure, it displays an error message using the `toast` function.
+  ///
+  /// Finally, it sets the loading state to false to indicate that the fetching process is complete.
+  ///
+  /// This method is called in the `initState` to load the friends list when the page is first displayed,
+  /// and can be called again to refresh the list after actions such as accepting or rejecting friend requests.
+  ///
+  /// The method makes a GET request to the "/friends" endpoint, and expects a JSON response containing a list of friends under the "data" key.
+  ///
+  /// The response is parsed into a list of `FriendsType` objects, which are then stored in the `_friends` state variable for display in the UI.
   Future<void> _fetchFriends() async {
     setState(() {
       _isLoadingfriends = true;
@@ -97,6 +141,22 @@ class _FriendPageView extends State<FriendPageView> {
     });
   }
 
+  /// Fetches the list of friend requests from the API and updates the state accordingly.
+  ///
+  /// Handles loading state and error messages to provide feedback to the user.
+  ///
+  /// On success, it parses the response and updates the `_friendRequests` list with the retrieved data.
+  ///
+  /// On failure, it displays an error message using the `toast` function.
+  ///
+  /// Finally, it sets the loading state to false to indicate that the fetching process is complete.
+  ///
+  /// This method is called in the `initState` to load the friend requests when the page is first displayed,
+  /// and can be called again to refresh the list after actions such as accepting or rejecting friend requests.
+  ///
+  /// The method makes a GET request to the "/friends/requests" endpoint, and expects a JSON response containing a list of friend requests under the "data" key.
+  ///
+  /// The response is parsed into a list of `FriendsRequestType` objects, which are then stored in the `_friendRequests` state variable for display in the UI.
   Future<void> _fetchFriendRequests() async {
     setState(() {
       _isLoadingFriendRequests = true;
@@ -110,7 +170,6 @@ class _FriendPageView extends State<FriendPageView> {
       if (response.statusCode == 200) {
         // Parse response and update _friendRequests list.
         final List<dynamic> body = jsonDecode(response.body)['data'] ?? [];
-        print("Friend requests response body: $body");
         final List<FriendsRequestType> friendRequests = body
             .map((item) => FriendsRequestType.fromJson(item))
             .toList();
@@ -173,6 +232,12 @@ class _FriendPageView extends State<FriendPageView> {
   }
 }
 
+/// The `FriendList` widget displays the list of friends, and the `FriendRequestList` widget displays the list of friend requests.
+/// Both components handle loading states and display appropriate messages when the lists are empty.
+///
+/// Fields:
+/// friends: A list of `FriendsType` objects representing the user's friends.
+/// isLoading: A boolean indicating whether the friends list is currently being loaded.
 class FriendList extends StatelessWidget {
   final List<FriendsType> friends;
   final bool isLoading;
@@ -181,10 +246,12 @@ class FriendList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Handle loading state
     if (isLoading) {
       return Center(child: CircularProgressIndicator());
     }
 
+    // Handle empty state
     if (friends.isEmpty && !isLoading) {
       return Center(
         child: Text(
@@ -201,7 +268,7 @@ class FriendList extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: FriendListTile(
             username: friends[index].username,
-            status: "Online",
+            // status: "Online",
             score: friends[index].daily_score,
             onUnfriend: () {
               // TODO(4KV6): Implement unfriend functionality.
@@ -213,6 +280,14 @@ class FriendList extends StatelessWidget {
   }
 }
 
+/// The `FriendRequestList` widget displays the list of friend requests, and allows users to accept or reject requests.
+/// It also handles loading states and displays appropriate messages when the list is empty.
+///
+/// Fields:
+/// friendRequests: A list of `FriendsRequestType` objects representing the user's friend requests.
+/// isLoading: A boolean indicating whether the friend requests list is currently being loaded.
+/// onRequestHandled: A callback function that is called after a friend request is accepted or rejected,
+/// allowing the parent widget to refresh the lists.
 class FriendRequestList extends StatelessWidget {
   final List<FriendsRequestType> friendRequests;
   final bool isLoading;
@@ -225,6 +300,15 @@ class FriendRequestList extends StatelessWidget {
     required this.onRequestHandled,
   });
 
+  /// Accepts a friend request by sending a PATCH request to the API with the requester's ID.
+  ///
+  /// On success, it displays a success message and calls the `onRequestHandled` callback to refresh the lists.
+  ///
+  /// On failure, it displays an error message with details from the API response.
+  ///
+  /// The method makes a PATCH request to the "/friends/request" endpoint, with the requester's ID in the request body.
+  ///
+  /// The API is expected to return a 200 status code on success, and may return error messages in the response body on failure.
   Future<void> _acceptFriendRequest(String requesterId) async {
     try {
       final response = await fetch(
@@ -250,6 +334,15 @@ class FriendRequestList extends StatelessWidget {
     }
   }
 
+  /// Rejects a friend request by sending a DELETE request to the API with the requester's ID.
+  ///
+  /// On success, it displays a success message and calls the `onRequestHandled` callback to refresh the lists.
+  ///
+  /// On failure, it displays an error message with details from the API response.
+  ///
+  /// The method makes a DELETE request to the "/friends/request/{requesterId}" endpoint, where `{requesterId}` is the ID of the requester.
+  ///
+  /// The API is expected to return a 200 status code on success, and may return error messages in the response body on failure.
   Future<void> _rejectFriendRequest(String requesterId) async {
     try {
       final response = await fetch(
@@ -275,10 +368,12 @@ class FriendRequestList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Handle loading state
     if (isLoading) {
       return Center(child: CircularProgressIndicator());
     }
 
+    // Handle empty state
     if (friendRequests.isEmpty && !isLoading) {
       return Center(
         child: Text(
@@ -295,8 +390,8 @@ class FriendRequestList extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: FriendRequestListTile(
             username: friendRequests[index].username,
-            time:
-                "2024-06-01 12:00", // TODO(4KV6): Replace with actual request time.
+            // time:
+            //     "2024-06-01 12:00", // TODO(4KV6): Replace with actual request time.
             onAccept: () {
               _acceptFriendRequest(friendRequests[index].requester_id);
             },
@@ -310,6 +405,11 @@ class FriendRequestList extends StatelessWidget {
   }
 }
 
+/// The `AddFriendForm` widget is a dialog that allows users to search for other users by username and send friend requests.
+/// It includes a text field for entering the username, and displays search results in a list below the text field.
+///
+/// Users can tap on a search result to select it, and then tap the "Add" button to send a friend request to the selected user.
+/// The form also handles loading states and displays appropriate messages when no users are found or when the search input is invalid.
 class AddFriendForm extends StatefulWidget {
   const AddFriendForm({super.key});
 
@@ -319,9 +419,9 @@ class AddFriendForm extends StatefulWidget {
 
 class _AddFriendForm extends State<AddFriendForm> {
   final TextEditingController _usernameController = TextEditingController();
-  List<Map<String, dynamic>> _searchResults = [];
+  List<FriendsSearchResultType> _searchResults = [];
   bool _isAddButtonDisabled = true;
-  int? _selectedUserId;
+  String? _selectedUserId;
   String? _selectedUsername;
 
   @override
@@ -330,24 +430,59 @@ class _AddFriendForm extends State<AddFriendForm> {
     _usernameController.addListener(_onUsernameChanged);
   }
 
-  void _onUsernameChanged() {
+  /// This method is called whenever the text in the username input field changes.
+  ///
+  /// It performs a search for users matching the input username by making a GET request to the "/friends/request" endpoint with the search parameter.
+  /// The search results are then displayed in a list below the input field.
+  ///
+  /// If the input is empty or too short, it clears the search results and disables the "Add" button.
+  ///
+  /// On success, it updates the `_searchResults` list with the retrieved users.
+  ///
+  /// On failure, it displays an error message using the `toast` function and clears the search results.
+  ///
+  /// On a 404 status code response, it clears the search results to indicate that no users were found.
+  ///
+  /// The method expects the API to return a JSON response containing a list of users under the "data" key, which is parsed into a list of `FriendsSearchResultType` objects for display in the UI.
+  Future<void> _onUsernameChanged() async {
     final input = _usernameController.text.trim();
-    setState(() {
-      if (input.isNotEmpty) {
-        // Mock search: filter mockUserData by username contains input (case-insensitive)
-        _searchResults = mockUserData
-            .where(
-              (user) =>
-                  (user["username"] as String?)?.toLowerCase().contains(
-                    input.toLowerCase(),
-                  ) ??
-                  false,
-            )
-            .toList();
-      } else {
+    // If the input is empty or too short, clear search results and disable the "Add" button.
+    if (input.isEmpty || input.length <= 1) {
+      setState(() {
         _searchResults = [];
-      }
-    });
+        _isAddButtonDisabled = true;
+      });
+      return;
+    }
+    final response = await fetch(
+      "/friends/request?search=$input",
+      HTTPMethod.get,
+      withAuth: true,
+    );
+    // Handle response and update search results
+    if (response.statusCode == 200) {
+      // Parse response and update _searchResults list.
+      final List<dynamic> body = jsonDecode(response.body)['data'] ?? [];
+      final List<FriendsSearchResultType> searchResults = body
+          .map((item) => FriendsSearchResultType.fromJson(item))
+          .toList();
+      setState(() {
+        _searchResults = searchResults;
+      });
+    } else if (response.statusCode == 404) {
+      // No users found, clear search results.
+      setState(() {
+        _searchResults = [];
+      });
+    } else {
+      final errorMessage =
+          jsonDecode(response.body)['message'] ?? 'Unknown error';
+      toast("Failed to search users: ${response.statusCode}\n$errorMessage");
+      setState(() {
+        _searchResults = [];
+        _isAddButtonDisabled = true;
+      });
+    }
   }
 
   @override
@@ -357,6 +492,17 @@ class _AddFriendForm extends State<AddFriendForm> {
     super.dispose();
   }
 
+  /// This method is called when the user taps the "Add" button to send a friend request to the selected user.
+  ///
+  /// It sends a POST request to the "/friends/request" endpoint with the selected user's ID in the request body.
+  ///
+  /// On success, it displays a success message and closes the dialog.
+  ///
+  /// On failure, it displays an error message with details from the API response.
+  ///
+  /// On a 409 status code response, it indicates that a friend request has already been sent to the selected user, and displays an appropriate message.
+  ///
+  /// The method expects the API to return a 200 status code on success, and may return error messages in the response body on failure.
   Future<void> _addFriend() async {
     if (_selectedUserId == null) return;
 
@@ -366,7 +512,7 @@ class _AddFriendForm extends State<AddFriendForm> {
         HTTPMethod.post,
         withAuth: true,
         headers: {"Content-Type": "application/json"},
-        body: {"username": _selectedUsername},
+        body: {"friend_id": _selectedUserId},
       );
 
       if (response.statusCode == 200) {
@@ -374,6 +520,18 @@ class _AddFriendForm extends State<AddFriendForm> {
         if (mounted) {
           Navigator.of(context).pop();
         }
+      } else if (response.statusCode == 409) {
+        // final selectedFriend = _searchResults.firstWhere(
+        //   (user) => user.friend_id == _selectedUserId,
+        // );
+        // if (selectedFriend.friend_at != null) {
+        //   toast("You are already friends with $_selectedUsername.");
+        // } else {
+        //   toast(
+        //     "A friend request has already been sent to $_selectedUsername.",
+        //   );
+        // }
+        toast("A friend request has already been sent to $_selectedUsername.");
       } else {
         final errorMessage =
             jsonDecode(response.body)['message'] ?? 'Unknown error';
@@ -403,32 +561,67 @@ class _AddFriendForm extends State<AddFriendForm> {
               ),
             ),
             const SizedBox(height: 16),
+            // Display search results if available.
             if (_searchResults.isNotEmpty)
               SizedBox(
-                height: 120, // Fixed height for the search results list
+                height:
+                    60 *
+                    (_searchResults.length.toDouble() <= 3
+                        ? _searchResults.length.toDouble()
+                        : 3),
                 child: ListView.builder(
+                  controller: ScrollController(
+                    initialScrollOffset: 0,
+                    keepScrollOffset: true,
+                  ),
                   itemCount: _searchResults.length,
-                  shrinkWrap: true,
                   itemBuilder: (context, index) {
                     final user = _searchResults[index];
                     return SizedBox(
                       height: 60,
                       child: ListTile(
                         selectedColor: primary,
-                        selected: user["id"] == _selectedUserId,
-                        title: Text(user["username"] ?? "Unknown"),
-                        subtitle: Text("Score: ${user["score"] ?? 0}"),
-                        trailing: Text(user["status"] ?? "Unknown"),
+                        selected: user.friend_id == _selectedUserId,
+                        title: Text(user.username),
+                        // subtitle: Text("Score: ${user.daily_score}"),
+                        trailing: user.friend_id == _selectedUserId
+                            ? Icon(Icons.check, color: primary)
+                            : null,
                         onTap: () {
                           setState(() {
-                            _selectedUserId = user["id"];
-                            _selectedUsername = user["username"];
+                            _selectedUserId = user.friend_id;
+                            _selectedUsername = user.username;
                             _isAddButtonDisabled = false;
                           });
                         },
                       ),
                     );
                   },
+                ),
+              ),
+            // Display messages for empty or invalid input states.
+            if (_searchResults.isEmpty &&
+                _usernameController.text.trim().isNotEmpty &&
+                _usernameController.text.trim().length >= 2)
+              SizedBox(
+                height: 60,
+                child: Center(
+                  child: Text(
+                    "No users found with that username.",
+                    style: TextStyle(color: primary),
+                  ),
+                ),
+              ),
+            // Display message when input is empty or too short.
+            if (_usernameController.text.trim().isEmpty ||
+                _usernameController.text.trim().length <= 1)
+              SizedBox(
+                height: 60,
+                child: Center(
+                  child: Text(
+                    "Please enter a username to search.\n(At least 2 characters)",
+                    style: TextStyle(color: primary),
+                  ),
                 ),
               ),
           ],
@@ -439,7 +632,6 @@ class _AddFriendForm extends State<AddFriendForm> {
           onPressed: _isAddButtonDisabled
               ? null
               : () {
-                  // TODO(4KV6): Implement add friend functionality.
                   _addFriend();
                 },
           child: Text("Add"),
