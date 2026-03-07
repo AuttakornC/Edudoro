@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/AuttakornC/Edudoro/server/models"
+	"github.com/AuttakornC/Edudoro/server/services"
 	"github.com/AuttakornC/Edudoro/server/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -32,4 +33,21 @@ func ScoreIncrease(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"message": "success"})
 
+}
+
+func ScoreGetOwnScore(c *gin.Context) {
+	accountId, _ := c.Get("account_id")
+
+	currentScore, err := services.ScoreGetUserScore(models.DB, accountId.(string))
+	if err != nil {
+		utils.RequestErrorHandlers(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data": map[string]int{
+			"score": currentScore,
+		},
+	})
 }

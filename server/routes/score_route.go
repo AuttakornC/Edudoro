@@ -12,4 +12,5 @@ func scoreRouteSetup(r *gin.RouterGroup) {
 	scoreRoute.Use(middlewares.AuthMiddleware())
 
 	scoreRoute.POST("", controllers.ScoreIncrease)
+	scoreRoute.GET("", controllers.ScoreGetOwnScore)
 }
