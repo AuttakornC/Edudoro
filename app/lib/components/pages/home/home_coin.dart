@@ -22,7 +22,7 @@ class _HomeCoinState extends State<HomeCoin> {
           icon: SVGIcon(src: "assets/icons/CartIcon.svg"),
         ),
         Text(
-          coinContext.isLoading ? "Loading" : coinContext.coin.toString(),
+          coinContext.coin.toString(),
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 24,

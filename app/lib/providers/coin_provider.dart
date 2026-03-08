@@ -1,42 +1,38 @@
 import 'dart:convert';
+
 import 'package:edudoro/utils/http.dart';
 import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class CoinProvider extends ChangeNotifier {
   int _coin = 0;
-  bool _isLoading = false;
 
-  bool get isLoading => _isLoading;
   int get coin => _coin;
 
-  CoinProvider() {
-    _loadCoin();
-  }
-
-  Future<void> _loadCoin() async {
-    _setLoading(true);
+  Future<bool> loadCoin() async {
     try {
-      final response = await fetch("/score", HTTPMethod.get);
+      final response = await fetch("/score", HTTPMethod.get, withAuth: true);
       final body = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final score = body['data']?['score'];
         if (score != null) {
           _coin = score;
+          notifyListeners();
+          return true;
         }
+      } else if (response.statusCode == 401) {
+        final storage = FlutterSecureStorage();
+        await storage.delete(key: "jwt_token");
       } else {
         final msg = body['message'];
         toast("Something went wrong. $msg");
       }
+      return false;
     } catch (e) {
       toast("Something went wrong. $e");
+      return false;
     }
-    _setLoading(false);
-  }
-
-  void _setLoading(bool status) {
-    _isLoading = status;
-    notifyListeners();
   }
 
   void increaseCoin(int inputCoin) {
@@ -48,6 +44,4 @@ class CoinProvider extends ChangeNotifier {
     _coin = inputCoin > _coin ? 0 : _coin - inputCoin;
     notifyListeners();
   }
-
-  Future<void> refresh() => _loadCoin();
 }
