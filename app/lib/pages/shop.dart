@@ -1,10 +1,36 @@
+import 'dart:convert';
+
 import 'package:edudoro/color.dart';
 import 'package:edudoro/components/ui/confirm_dialog.dart';
 import 'package:edudoro/components/util/svgIcon.dart';
 import 'package:edudoro/providers/coin_provider.dart';
-import 'package:edudoro/providers/shop_provider.dart';
+import 'package:edudoro/utils/http.dart';
+import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+enum _BuyResult { success, notEnoughCoins, alreadyBought, notFound, error }
+
+class _ShopItem {
+  final String decorationId;
+  final String detail;
+  final int price;
+  bool owned;
+
+  _ShopItem({
+    required this.decorationId,
+    required this.detail,
+    required this.price,
+    required this.owned,
+  });
+
+  factory _ShopItem.fromJson(Map<String, dynamic> json) => _ShopItem(
+        decorationId: json['decoration_id'] as String,
+        detail: json['detail'] as String,
+        price: json['price'] as int,
+        owned: json['owned'] as bool,
+      );
+}
 
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key});
@@ -14,48 +40,101 @@ class ShopPage extends StatefulWidget {
 }
 
 class _ShopPageState extends State<ShopPage> {
+  List<_ShopItem> _icons = [];
+  List<_ShopItem> _frames = [];
+  List<_ShopItem> _nameColors = [];
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => context.read<ShopProvider>().fetchDecorations(),
-    );
+    Future.microtask(_fetchDecorations);
   }
 
-  Future<void> _handleBuy(ShopDecorationItem item) async {
-    final shopProvider = context.read<ShopProvider>();
+  Future<void> _fetchDecorations() async {
+    setState(() => _isLoading = true);
+    try {
+      final response = await fetch(
+        "/shop/decorations",
+        HTTPMethod.get,
+        withAuth: true,
+      );
+      final body = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final data = body['data'];
+        setState(() {
+          _icons = (data['icons'] as List)
+              .map((e) => _ShopItem.fromJson(e as Map<String, dynamic>))
+              .toList();
+          _frames = (data['frames'] as List)
+              .map((e) => _ShopItem.fromJson(e as Map<String, dynamic>))
+              .toList();
+          _nameColors = (data['name_colors'] as List)
+              .map((e) => _ShopItem.fromJson(e as Map<String, dynamic>))
+              .toList();
+        });
+      } else {
+        toast("Failed to load shop items. ${body['message']}");
+      }
+    } catch (e) {
+      toast("Something went wrong. $e");
+    }
+    setState(() => _isLoading = false);
+  }
+
+  Future<_BuyResult> _buyDecoration(String decorationId) async {
+    try {
+      final response = await fetch(
+        "/shop/buy",
+        HTTPMethod.post,
+        body: {'decoration_id': decorationId},
+        withAuth: true,
+      );
+      if (response.statusCode == 201) {
+        setState(() {
+          for (final list in [_icons, _frames, _nameColors]) {
+            for (final item in list) {
+              if (item.decorationId == decorationId) item.owned = true;
+            }
+          }
+        });
+        return _BuyResult.success;
+      } else if (response.statusCode == 402) {
+        return _BuyResult.notEnoughCoins;
+      } else if (response.statusCode == 409) {
+        return _BuyResult.alreadyBought;
+      } else if (response.statusCode == 404) {
+        return _BuyResult.notFound;
+      }
+    } catch (e) {
+      toast("Something went wrong. $e");
+    }
+    return _BuyResult.error;
+  }
+
+  Future<void> _handleBuy(_ShopItem item) async {
     final coinProvider = context.read<CoinProvider>();
-    final result = await shopProvider.buyDecoration(item.decorationId);
+    final result = await _buyDecoration(item.decorationId);
     if (!mounted) return;
     switch (result) {
-      case BuyResult.success:
-        await coinProvider.refresh();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Purchase successful!")),
-        );
-      case BuyResult.notEnoughCoins:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Not enough coins!")),
-        );
-      case BuyResult.alreadyBought:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("You already own this item!")),
-        );
-      case BuyResult.notFound:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Item not found.")),
-        );
-      case BuyResult.error:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Something went wrong.")),
-        );
+      case _BuyResult.success:
+        coinProvider.decreaseCoin(item.price);
+        toast("Purchase successful!");
+      case _BuyResult.notEnoughCoins:
+        toast("Not enough coins!");
+      case _BuyResult.alreadyBought:
+        toast("You already own this item!");
+      case _BuyResult.notFound:
+        toast("Item not found.");
+      case _BuyResult.error:
+        toast("Something went wrong.");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<CoinProvider, ShopProvider>(
-      builder: (context, coinProvider, shopProvider, _) {
+    return Consumer<CoinProvider>(
+      builder: (context, coinProvider, _) {
         return Scaffold(
           appBar: AppBar(
             title: Row(
@@ -93,7 +172,7 @@ class _ShopPageState extends State<ShopPage> {
             ),
           ),
           body: SafeArea(
-            child: shopProvider.isLoading
+            child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
@@ -103,31 +182,22 @@ class _ShopPageState extends State<ShopPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (shopProvider.icons.isNotEmpty) ...[
+                        if (_icons.isNotEmpty) ...[
                           const _SectionHeader(title: "Avatars"),
                           const SizedBox(height: 12),
-                          _ItemGrid(
-                            items: shopProvider.icons,
-                            onBuy: _handleBuy,
-                          ),
+                          _ItemGrid(items: _icons, onBuy: _handleBuy),
                           const SizedBox(height: 24),
                         ],
-                        if (shopProvider.frames.isNotEmpty) ...[
+                        if (_frames.isNotEmpty) ...[
                           const _SectionHeader(title: "Frames"),
                           const SizedBox(height: 12),
-                          _ItemGrid(
-                            items: shopProvider.frames,
-                            onBuy: _handleBuy,
-                          ),
+                          _ItemGrid(items: _frames, onBuy: _handleBuy),
                           const SizedBox(height: 24),
                         ],
-                        if (shopProvider.nameColors.isNotEmpty) ...[
+                        if (_nameColors.isNotEmpty) ...[
                           const _SectionHeader(title: "Name Colors"),
                           const SizedBox(height: 12),
-                          _ItemGrid(
-                            items: shopProvider.nameColors,
-                            onBuy: _handleBuy,
-                          ),
+                          _ItemGrid(items: _nameColors, onBuy: _handleBuy),
                           const SizedBox(height: 24),
                         ],
                       ],
@@ -164,8 +234,8 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _ItemGrid extends StatelessWidget {
-  final List<ShopDecorationItem> items;
-  final void Function(ShopDecorationItem) onBuy;
+  final List<_ShopItem> items;
+  final void Function(_ShopItem) onBuy;
 
   const _ItemGrid({required this.items, required this.onBuy});
 
@@ -188,8 +258,8 @@ class _ItemGrid extends StatelessWidget {
 }
 
 class _ShopCard extends StatelessWidget {
-  final ShopDecorationItem item;
-  final void Function(ShopDecorationItem) onBuy;
+  final _ShopItem item;
+  final void Function(_ShopItem) onBuy;
 
   const _ShopCard({required this.item, required this.onBuy});
 
