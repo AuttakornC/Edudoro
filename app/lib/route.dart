@@ -3,6 +3,7 @@ import 'package:edudoro/pages/friend.dart';
 import 'package:edudoro/pages/goal.dart';
 import 'package:edudoro/pages/home.dart';
 import 'package:edudoro/pages/landing.dart';
+import 'package:edudoro/pages/loading.dart';
 import 'package:edudoro/pages/profile.dart';
 import 'package:edudoro/pages/setting.dart';
 import 'package:edudoro/pages/shop.dart';
@@ -19,8 +20,12 @@ class RouteApp extends StatelessWidget {
     return MaterialApp(
       title: 'Edudoro',
       theme: theme,
+      navigatorKey: Nav.key,
       routes: {
         "/": (context) => const LandingPage(),
+        "/loading": (context) => const LoadingPage(),
+        "/sign_in": (context) => const SignInPage(),
+        "/sign_up": (context) => const SignUpPage(),
         "/avatar_change": (context) => const AvatarChangePage(),
         "/friend": (context) => const FriendPage(),
         "/goal": (context) => const GoalPage(),
@@ -28,9 +33,15 @@ class RouteApp extends StatelessWidget {
         "/profile": (context) => const ProfilePage(),
         "/setting": (context) => const SettingPage(),
         "/shop": (context) => const ShopPage(),
-        "/sign_in": (context) => const SignInPage(),
-        "/sign_up": (context) => const SignUpPage(),
       },
     );
+  }
+}
+
+class Nav {
+  static final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+
+  static void goTo(String routeName) {
+    key.currentState?.pushNamed(routeName);
   }
 }

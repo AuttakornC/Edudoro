@@ -1,50 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+void changePage(BuildContext context) async {
+  const storage = FlutterSecureStorage();
+  final token = await storage.read(key: "jwt_token");
+  if (token == null) {
+    if (context.mounted) {
+      Navigator.of(context).pushReplacementNamed("/sign_in");
+    }
+  } else {
+    if (context.mounted) {
+      Navigator.of(context).pushReplacementNamed("/loading");
+    }
+  }
+}
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    changePage(context);
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: TempNavigator(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                child: Image.asset(
+                  "assets/edudoro-logo.png",
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
-}
-
-class TempNavigator extends StatelessWidget {
-  const TempNavigator({super.key});
-
-  static final List<String> _pageList = [
-    "/avatar_change",
-    "/friend",
-    "/goal",
-    "/home",
-    "/profile",
-    "/setting",
-    "/shop",
-    "/sign_in",
-    "/sign_up",
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: _pageList.map((path) => generateButton(context, path)).toList(),
-    );
-  }
-
-  Widget generateButton(BuildContext context, String path) {
-    String label = "go to $path";
-
-    return Center(
-      child: TextButton(
-        onPressed: () => {Navigator.of(context).pushNamed(path)},
-        child: Text(label),
       ),
     );
   }
