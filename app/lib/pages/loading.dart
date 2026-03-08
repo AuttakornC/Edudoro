@@ -31,7 +31,7 @@ class _LoadingPageState extends State<LoadingPage> {
     ]);
 
     if (arraySuccess.every((element) => element)) {
-      Nav.goTo("/home");
+      Nav.goTo("/home", removeAll: true);
     }
   }
 

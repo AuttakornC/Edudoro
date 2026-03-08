@@ -41,7 +41,11 @@ class RouteApp extends StatelessWidget {
 class Nav {
   static final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
 
-  static void goTo(String routeName) {
+  static void goTo(String routeName, {bool? removeAll}) {
+    if (removeAll != null && removeAll) {
+      key.currentState?.pushNamedAndRemoveUntil(routeName, (route) => false);
+      return;
+    }
     key.currentState?.pushNamed(routeName);
   }
 }

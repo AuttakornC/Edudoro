@@ -1,3 +1,4 @@
+import 'package:edudoro/route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -5,13 +6,9 @@ void changePage(BuildContext context) async {
   const storage = FlutterSecureStorage();
   final token = await storage.read(key: "jwt_token");
   if (token == null) {
-    if (context.mounted) {
-      Navigator.of(context).pushReplacementNamed("/sign_in");
-    }
+    Nav.goTo("/sign_in", removeAll: true);
   } else {
-    if (context.mounted) {
-      Navigator.of(context).pushReplacementNamed("/loading");
-    }
+    Nav.goTo("/loading", removeAll: true);
   }
 }
 

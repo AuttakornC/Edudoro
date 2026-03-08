@@ -11,7 +11,9 @@ class ProfilePage extends StatelessWidget {
     const storage = FlutterSecureStorage();
     await storage.delete(key: 'jwt_token');
     if (context.mounted) {
-      Navigator.of(context).pushReplacementNamed('/sign_in');
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil('/sign_in', (route) => false);
     }
   }
 
@@ -22,10 +24,7 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           "PROFILE",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: primary,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: primary),
         ),
         actions: [
           IconButton(
@@ -64,7 +63,8 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 10),
 
                 InkWell(
-                  onTap: () => Navigator.of(context).pushNamed("/avatar_change"),
+                  onTap: () =>
+                      Navigator.of(context).pushNamed("/avatar_change"),
                   child: Text(
                     "Edit",
                     style: TextStyle(
