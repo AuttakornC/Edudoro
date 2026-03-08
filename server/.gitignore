@@ -5,3 +5,5 @@
 !.env.example
 
 server
+
+*.txt

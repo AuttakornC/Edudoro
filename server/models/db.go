@@ -15,4 +15,6 @@ func ConnectDatabase() {
 	DB = database
 
 	DB.AutoMigrate(&Account{}, &BoughtDecoration{}, &Decoration{}, &Friend{}, &Score{})
+
+	// DB.Transaction(SeedDatabase)
 }
