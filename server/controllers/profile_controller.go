@@ -18,6 +18,12 @@ type profileDecorations struct {
 	BoughtAt     time.Time             `json:"bought_at"`
 }
 
+type profileGetDetail struct {
+	Username    string               `json:"username"`
+	Email       string               `json:"email"`
+	Decorations []profileDecorations `json:"decorations"`
+}
+
 func ProfileGetCurrentUsingDecorations(c *gin.Context) {
 	accountId, _ := c.Get("account_id")
 
@@ -42,9 +48,15 @@ func ProfileGetCurrentUsingDecorations(c *gin.Context) {
 		decorations = append(decorations, profileDecorations{DecorationId: decoration.DecorationId, Type: decoration.Decoration.Type, Detail: decoration.Decoration.Detail, BoughtAt: decoration.CreatedAt})
 	}
 
+	profileDetail := profileGetDetail{
+		Username:    account.Username,
+		Email:       account.Email,
+		Decorations: decorations,
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
-		"data":    decorations,
+		"data":    profileDetail,
 	})
 }
 
