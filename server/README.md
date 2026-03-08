@@ -185,16 +185,19 @@ response:
     'icons': {
       'decoration_id': string,
       'detail': string,
+      'price': number,
       'owned': bool
     }[],
     'frames': {
       'decoration_id': string,
       'detail': string,
+      'price': number,
       'owned': bool
     }[],
     'name_colors': {
       'decoration_id': string,
       'detail': string,
+      'price': number,
       'owned': bool
     }[]
   }

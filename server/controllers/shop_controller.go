@@ -14,6 +14,7 @@ import (
 type shopQueryAllDecorationsResponseBody struct {
 	DecorationId string `json:"decoration_id"`
 	Detail       string `json:"detail"`
+	Price        int    `json:"price"`
 	Owned        bool   `json:"owned"`
 }
 
@@ -39,11 +40,11 @@ func ShopQueryAllDecorations(c *gin.Context) {
 	for _, decoration := range decorations {
 		switch decoration.Type {
 		case models.DecorationIconType:
-			icons = append(icons, shopQueryAllDecorationsResponseBody{DecorationId: decoration.DecorationId, Detail: decoration.Detail, Owned: len(decoration.OwnedUsers) != 0})
+			icons = append(icons, shopQueryAllDecorationsResponseBody{DecorationId: decoration.DecorationId, Detail: decoration.Detail, Owned: len(decoration.OwnedUsers) != 0, Price: decoration.Price})
 		case models.DecorationFrameType:
-			frames = append(frames, shopQueryAllDecorationsResponseBody{DecorationId: decoration.DecorationId, Detail: decoration.Detail, Owned: len(decoration.OwnedUsers) != 0})
+			frames = append(frames, shopQueryAllDecorationsResponseBody{DecorationId: decoration.DecorationId, Detail: decoration.Detail, Owned: len(decoration.OwnedUsers) != 0, Price: decoration.Price})
 		case models.DecorationNameColorType:
-			nameColors = append(nameColors, shopQueryAllDecorationsResponseBody{DecorationId: decoration.DecorationId, Detail: decoration.Detail, Owned: len(decoration.OwnedUsers) != 0})
+			nameColors = append(nameColors, shopQueryAllDecorationsResponseBody{DecorationId: decoration.DecorationId, Detail: decoration.Detail, Owned: len(decoration.OwnedUsers) != 0, Price: decoration.Price})
 		}
 	}
 
