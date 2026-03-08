@@ -1,6 +1,7 @@
 import 'package:edudoro/background_service.dart';
 import 'package:edudoro/providers/clock_setting_provider.dart';
 import 'package:edudoro/providers/coin_provider.dart';
+import 'package:edudoro/providers/shop_provider.dart';
 import 'package:edudoro/route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +16,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ClockSettingProvider()),
         ChangeNotifierProvider(create: (_) => CoinProvider()),
+        ChangeNotifierProvider(create: (_) => ShopProvider()),
       ],
       child: const RouteApp(),
     ),

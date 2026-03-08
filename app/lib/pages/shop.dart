@@ -1,35 +1,10 @@
 import 'package:edudoro/color.dart';
+import 'package:edudoro/components/ui/confirm_dialog.dart';
 import 'package:edudoro/components/util/svgIcon.dart';
+import 'package:edudoro/providers/coin_provider.dart';
+import 'package:edudoro/providers/shop_provider.dart';
 import 'package:flutter/material.dart';
-
-class _ShopItem {
-  final String id;
-  final String label;
-  final int price;
-  final String? iconSrc;
-
-  const _ShopItem({
-    required this.id,
-    required this.label,
-    required this.price,
-    this.iconSrc,
-  });
-}
-
-final _avatarItems = List.generate(
-  9,
-  (i) => _ShopItem(
-    id: 'avatar_$i',
-    label: 'Avatar ${i + 1}',
-    price: 100 * (i + 1),
-  ),
-);
-
-final _frameItems = List.generate(
-  9,
-  (i) =>
-      _ShopItem(id: 'frame_$i', label: 'Frame ${i + 1}', price: 150 * (i + 1)),
-);
+import 'package:provider/provider.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key});
@@ -39,77 +14,128 @@ class ShopPage extends StatefulWidget {
 }
 
 class _ShopPageState extends State<ShopPage> {
-  int _coins = 9999;
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => context.read<ShopProvider>().fetchDecorations(),
+    );
+  }
 
-  void _buy(_ShopItem item) {
-    if (_coins < item.price) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Not enough coins!")));
-      return;
+  Future<void> _handleBuy(ShopDecorationItem item) async {
+    final shopProvider = context.read<ShopProvider>();
+    final coinProvider = context.read<CoinProvider>();
+    final result = await shopProvider.buyDecoration(item.decorationId);
+    if (!mounted) return;
+    switch (result) {
+      case BuyResult.success:
+        await coinProvider.refresh();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Purchase successful!")),
+        );
+      case BuyResult.notEnoughCoins:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Not enough coins!")),
+        );
+      case BuyResult.alreadyBought:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("You already own this item!")),
+        );
+      case BuyResult.notFound:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Item not found.")),
+        );
+      case BuyResult.error:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Something went wrong.")),
+        );
     }
-    setState(() => _coins -= item.price);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text("Purchased ${item.label}!")));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(width: 45),
-            const Text(
-              "SHOP",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-                color: primary,
-              ),
-            ),
-            Row(
+    return Consumer2<CoinProvider, ShopProvider>(
+      builder: (context, coinProvider, shopProvider, _) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "$_coins",
-                  style: const TextStyle(
+                const SizedBox(width: 45),
+                const Text(
+                  "SHOP",
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 24,
-                    color: yellow100,
+                    color: primary,
                   ),
                 ),
-                const SizedBox(width: 4),
-                const SVGIcon(
-                  src: "assets/icons/CoinIcon.svg",
-                  color: yellow100,
-                  width: 24,
-                  height: 24,
+                Row(
+                  children: [
+                    Text(
+                      "${coinProvider.coin}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                        color: yellow100,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const SVGIcon(
+                      src: "assets/icons/CoinIcon.svg",
+                      color: yellow100,
+                      width: 24,
+                      height: 24,
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SectionHeader(title: "Avatars"),
-              const SizedBox(height: 12),
-              _ItemGrid(items: _avatarItems, onBuy: _buy),
-              const SizedBox(height: 24),
-              _SectionHeader(title: "Frames"),
-              const SizedBox(height: 12),
-              _ItemGrid(items: _frameItems, onBuy: _buy),
-              const SizedBox(height: 24),
-            ],
           ),
-        ),
-      ),
+          body: SafeArea(
+            child: shopProvider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (shopProvider.icons.isNotEmpty) ...[
+                          const _SectionHeader(title: "Avatars"),
+                          const SizedBox(height: 12),
+                          _ItemGrid(
+                            items: shopProvider.icons,
+                            onBuy: _handleBuy,
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                        if (shopProvider.frames.isNotEmpty) ...[
+                          const _SectionHeader(title: "Frames"),
+                          const SizedBox(height: 12),
+                          _ItemGrid(
+                            items: shopProvider.frames,
+                            onBuy: _handleBuy,
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                        if (shopProvider.nameColors.isNotEmpty) ...[
+                          const _SectionHeader(title: "Name Colors"),
+                          const SizedBox(height: 12),
+                          _ItemGrid(
+                            items: shopProvider.nameColors,
+                            onBuy: _handleBuy,
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      ],
+                    ),
+                  ),
+          ),
+        );
+      },
     );
   }
 }
@@ -138,8 +164,8 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _ItemGrid extends StatelessWidget {
-  final List<_ShopItem> items;
-  final void Function(_ShopItem) onBuy;
+  final List<ShopDecorationItem> items;
+  final void Function(ShopDecorationItem) onBuy;
 
   const _ItemGrid({required this.items, required this.onBuy});
 
@@ -162,74 +188,16 @@ class _ItemGrid extends StatelessWidget {
 }
 
 class _ShopCard extends StatelessWidget {
-  final _ShopItem item;
-  final void Function(_ShopItem) onBuy;
+  final ShopDecorationItem item;
+  final void Function(ShopDecorationItem) onBuy;
 
   const _ShopCard({required this.item, required this.onBuy});
 
   Future<void> _showConfirmDialog(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+    if (item.owned) return;
+    final confirmed = await showConfirmDialog(
       context: context,
-      barrierColor: Colors.black38,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: secondary,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Are you sure to\nbuy this item?",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: primary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary,
-                        foregroundColor: white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () => Navigator.of(ctx).pop(true),
-                      child: const Text(
-                        "Confirm",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: primary,
-                        side: const BorderSide(color: primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () => Navigator.of(ctx).pop(false),
-                      child: const Text(
-                        "Cancel",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+      message: "Are you sure to\nbuy this item?",
     );
     if (confirmed == true) onBuy(item);
   }
@@ -249,46 +217,49 @@ class _ShopCard extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(12),
-                child: item.iconSrc != null
-                    ? SVGIcon(src: item.iconSrc!, width: 56, height: 56)
-                    : const Center(
-                        child: Icon(
-                          Icons.image_outlined,
-                          size: 48,
-                          color: primary,
-                        ),
-                      ),
+                child: _buildPreview(),
               ),
             ),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              decoration: const BoxDecoration(
-                color: primary,
-                borderRadius: BorderRadius.only(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              decoration: BoxDecoration(
+                color: item.owned ? Colors.green : primary,
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(12),
                   bottomRight: Radius.circular(12),
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "${item.price}",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      color: yellow100,
-                    ),
-                  ),
-                  const SizedBox(width: 3),
-                  const SVGIcon(
-                    src: "assets/icons/CoinIcon.svg",
-                    color: yellow100,
-                    width: 14,
-                    height: 14,
-                  ),
-                ],
+              child: Center(
+                child: item.owned
+                    ? const Text(
+                        "Owned",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: white,
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          SVGIcon(
+                            src: "assets/icons/CoinIcon.svg",
+                            color: yellow100,
+                            width: 14,
+                            height: 14,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            "Buy",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: yellow100,
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
           ],
@@ -296,4 +267,40 @@ class _ShopCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildPreview() {
+    // Color code detail (e.g. name_color type)
+    if (item.detail.startsWith('#')) {
+      final color = _parseHexColor(item.detail);
+      return Center(
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(color: primary, width: 2),
+          ),
+        ),
+      );
+    }
+    // SVG asset or remote URL
+    if (item.detail.endsWith('.svg')) {
+      return SVGIcon(src: item.detail, width: 56, height: 56);
+    }
+    // Fallback
+    return const Center(
+      child: Icon(Icons.image_outlined, size: 48, color: primary),
+    );
+  }
+
+  Color _parseHexColor(String hex) {
+    final cleaned = hex.replaceFirst('#', '');
+    final value = int.tryParse(
+      cleaned.length == 6 ? 'FF$cleaned' : cleaned,
+      radix: 16,
+    );
+    return value != null ? Color(value) : primary;
+  }
 }
+

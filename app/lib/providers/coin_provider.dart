@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:edudoro/utils/http.dart';
 import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
@@ -49,4 +48,6 @@ class CoinProvider extends ChangeNotifier {
     _coin = inputCoin > _coin ? 0 : _coin - inputCoin;
     notifyListeners();
   }
+
+  Future<void> refresh() => _loadCoin();
 }
