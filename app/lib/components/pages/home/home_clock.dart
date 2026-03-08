@@ -110,13 +110,6 @@ class _HomeClockState extends State<HomeClock>
   Widget build(BuildContext context) {
     var settings = context.watch<ClockSettingProvider>();
 
-    if (settings.isLoading) {
-      return Padding(
-        padding: const EdgeInsets.all(48),
-        child: Text("Loading..."),
-      );
-    }
-
     _setting(settings.workTime, settings.restTime, 'work');
 
     return Padding(

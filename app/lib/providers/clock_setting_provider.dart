@@ -1,21 +1,15 @@
+import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ClockSettingProvider extends ChangeNotifier {
   double _workTime = 5 / 60;
   double _restTime = 5 / 60;
-  bool _isLoading = true;
 
   double get workTime => _workTime;
   double get restTime => _restTime;
-  bool get isLoading => _isLoading;
 
-  ClockSettingProvider() {
-    _loadSettings();
-  }
-
-  Future<void> _loadSettings() async {
-    _setLoading(true);
+  Future<bool> loadSettings() async {
     final storage = FlutterSecureStorage();
 
     String? workTimeStr = await storage.read(key: "work_time");
@@ -30,27 +24,28 @@ class ClockSettingProvider extends ChangeNotifier {
       _restTime = restTimeParsed;
     }
 
-    _setLoading(false);
+    return true;
   }
 
   void updateWorkTime(double inputWorkTime) async {
-    _setLoading(true);
-    final storage = FlutterSecureStorage();
-    await storage.write(key: "work_time", value: inputWorkTime.toString());
     _workTime = inputWorkTime;
-    _setLoading(false);
+    notifyListeners();
+    try {
+      final storage = FlutterSecureStorage();
+      await storage.write(key: "work_time", value: inputWorkTime.toString());
+    } catch (e) {
+      toast("Can not save work time to local storage");
+    }
   }
 
   void updateRestTime(double inputRestTime) async {
-    _setLoading(true);
-    final storage = FlutterSecureStorage();
     _restTime = inputRestTime;
-    await storage.write(key: "work_time", value: inputRestTime.toString());
-    _setLoading(false);
-  }
-
-  void _setLoading(bool status) {
-    _isLoading = status;
     notifyListeners();
+    try {
+      final storage = FlutterSecureStorage();
+      await storage.write(key: "rest_time", value: inputRestTime.toString());
+    } catch (e) {
+      toast("Can not save rest time to local storage");
+    }
   }
 }
