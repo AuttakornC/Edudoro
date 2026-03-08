@@ -1,7 +1,11 @@
 import 'package:edudoro/color.dart';
 import 'package:edudoro/components/ui/button.dart';
+import 'package:edudoro/providers/clock_setting_provider.dart';
+import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:provider/provider.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -15,6 +19,20 @@ class _SettingPageState extends State<SettingPage> {
   final _breakController = TextEditingController(text: '5');
 
   @override
+  void initState() {
+    super.initState();
+
+    _workController.text = context
+        .read<ClockSettingProvider>()
+        .workTime
+        .toString();
+    _breakController.text = context
+        .read<ClockSettingProvider>()
+        .restTime
+        .toString();
+  }
+
+  @override
   void dispose() {
     _workController.dispose();
     _breakController.dispose();
@@ -22,24 +40,23 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   void _save() {
-    final workTime = int.tryParse(_workController.text);
-    final breakTime = int.tryParse(_breakController.text);
+    final workTime = double.tryParse(_workController.text);
+    final breakTime = double.tryParse(_breakController.text);
 
     if (workTime == null ||
         workTime <= 0 ||
         breakTime == null ||
         breakTime <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter valid times.")),
-      );
+      toast("Please enter valid times.");
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Saved! Work: ${workTime}m  Break: ${breakTime}m"),
-      ),
-    );
+    final service = FlutterBackgroundService();
+
+    service.invoke("cancel");
+    context.read<ClockSettingProvider>().updateWorkTime(workTime);
+    context.read<ClockSettingProvider>().updateRestTime(breakTime);
+    toast("Saved! Work: ${workTime}m  Break: ${breakTime}m");
   }
 
   @override
