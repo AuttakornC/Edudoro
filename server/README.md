@@ -167,6 +167,28 @@ response:
 }
 ```
 
+### - Unfriend
+
+```bash
+DELETE /api/v1/friends/:friend_id
+
+request:
+authRequire - true
+
+response:
+200 - {
+  'message': 'success'
+}
+
+404 - {
+  'message': 'friend_not_found'
+}
+
+500 - {
+  'message': string # system error
+}
+```
+
 ## Shop
 
 ### - Query All Shop Items
@@ -261,11 +283,15 @@ response:
 200 - {
   'message': 'success',
   'data': {
-    'decoration_id': string,
-    'type': 'icon' | 'frame' | 'name_color',
-    'detail': string,
-    'bought_at': Date
-  }[]
+    'username': string,
+    'email': string,
+    'decorations': {
+      'decoration_id': string,
+      'type': 'icon' | 'frame' | 'name_color',
+      'detail': string,
+      'bought_at': Date
+    }[]
+  }
 }
 
 500 - {
