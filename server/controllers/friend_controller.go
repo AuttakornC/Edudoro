@@ -277,3 +277,26 @@ func FriendSearch(c *gin.Context) {
 		"data":    friendsResponseBody,
 	})
 }
+
+func FriendUnFriend(c *gin.Context) {
+	friendId := c.Param("friend_id")
+	accountId, _ := c.Get("account_id")
+
+	result := models.DB.
+		Where("(requester_id = ? AND friend_id = ?) OR (requester_id = ? AND friend_id = ?)", accountId, friendId, friendId, accountId).
+		Delete(&models.Friend{})
+
+	if result.Error != nil {
+		utils.RequestErrorHandlers(c, http.StatusInternalServerError, result.Error)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		utils.RequestErrorHandlers(c, http.StatusNotFound, errors.New("friend_not_found"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+	})
+}

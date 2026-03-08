@@ -12,6 +12,7 @@ func friendRouteSetup(r *gin.RouterGroup) {
 	friendRoute.Use(middlewares.AuthMiddleware())
 
 	friendRoute.GET("", controllers.FriendAcceptedQuery)
+	friendRoute.DELETE("/:friend_id", controllers.FriendUnFriend)
 	friendRoute.GET("/requests", controllers.FriendRequestQuery)
 	friendRoute.GET("/request", controllers.FriendSearch)
 	friendRoute.POST("/request", controllers.FriendRequest)
