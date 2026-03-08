@@ -1,10 +1,19 @@
 import 'package:edudoro/color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../components/util/svgIcon.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
+
+  Future<void> _logout(BuildContext context) async {
+    const storage = FlutterSecureStorage();
+    await storage.delete(key: 'jwt_token');
+    if (context.mounted) {
+      Navigator.of(context).pushReplacementNamed('/sign_in');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +27,14 @@ class ProfilePage extends StatelessWidget {
             color: primary,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () => _logout(context),
+            icon: const Icon(Icons.logout),
+            color: primary,
+            tooltip: "Logout",
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
