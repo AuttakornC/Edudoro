@@ -62,17 +62,17 @@ class FriendPage extends StatelessWidget {
 /// The `FriendPageView` widget manages the state and logic for the friends page,
 /// including fetching friends and friend requests, and handling user interactions.
 ///
-/// It uses an `IndexedStack` to switch between the friends list and friend request list,
-/// and a `BottomNavigationBar` for navigation.
+/// It uses an [IndexedStack] to switch between the friends list and friend request list,
+/// and a [BottomNavigationBar] for navigation.
 ///
-/// The `FloatingActionButton` is used to open the `AddFriendForm` dialog for adding new friends.
+/// The [FloatingActionButton] is used to open the [AddFriendForm] dialog for adding new friends.
 ///
-/// The `AddFriendForm` is displayed as a dialog when the user taps the floating action button to add a new friend.
+/// The [AddFriendForm] is displayed as a dialog when the user taps the floating action button to add a new friend.
 ///
-/// The `FriendList` and `FriendRequestList` components are responsible for displaying the respective lists of friends and friend requests,
+/// The [FriendList] and [FriendRequestList] components are responsible for displaying the respective lists of friends and friend requests,
 /// and handling user interactions such as accepting or rejecting friend requests, and unfriending users.
 ///
-/// The `FriendListTile` and `FriendRequestListTile` components are used to display individual friend and friend request items in the lists, respectively.
+/// The [FriendListTile] and [FriendRequestListTile] components are used to display individual friend and friend request items in the lists, respectively.
 /// The page also includes error handling and loading states to provide feedback to the user during API interactions.
 class FriendPageView extends StatefulWidget {
   const FriendPageView({super.key});
@@ -81,14 +81,27 @@ class FriendPageView extends StatefulWidget {
   State<StatefulWidget> createState() => _FriendPageView();
 }
 
+/// The `_FriendPageView` class is the stateful implementation of the `FriendPageView` widget.
+///
+/// It manages the state for the friends list, friend requests, loading states, and user interactions such as accepting/rejecting friend requests and adding new friends.
+/// Also index of the currently selected tab (friends list or friend requests) is managed here to switch between the two views.
 class _FriendPageView extends State<FriendPageView> {
+  /// The index of the currently selected tab in the bottom navigation bar.
   int _selectedIndex = 0;
+
+  /// A boolean indicating whether the friends list is currently being loaded.
   bool _isLoadingfriends = true;
+
+  /// A boolean indicating whether the friend requests list is currently being loaded.
   bool _isLoadingFriendRequests = true;
 
+  /// A list of [FriendsType] objects representing the user's friends.
   final List<FriendsType> _friends = [];
+
+  /// A list of [FriendsRequestType] objects representing the user's friend requests.
   final List<FriendsRequestType> _friendRequests = [];
 
+  // Initial fetching of friends and friend requests when the page is first displayed.
   @override
   void initState() {
     super.initState();
@@ -121,9 +134,11 @@ class _FriendPageView extends State<FriendPageView> {
       if (response.statusCode == 200) {
         // Parse response and update _friends list.
         final List<dynamic> body = jsonDecode(response.body)['data'] ?? [];
+        print("Raw friends data from API: $body");
         final List<FriendsType> friends = body
             .map((item) => FriendsType.fromJson(item))
             .toList();
+        print("Fetched friends: $friends");
         setState(() {
           _friends.clear();
           _friends.addAll(friends);
@@ -232,14 +247,17 @@ class _FriendPageView extends State<FriendPageView> {
   }
 }
 
-/// The `FriendList` widget displays the list of friends, and the `FriendRequestList` widget displays the list of friend requests.
+/// The `FriendList` widget displays the list of friends, and the [FriendRequestList] widget displays the list of friend requests.
 /// Both components handle loading states and display appropriate messages when the lists are empty.
 ///
 /// Fields:
-/// friends: A list of `FriendsType` objects representing the user's friends.
+/// friends: A list of [FriendsType] objects representing the user's friends.
 /// isLoading: A boolean indicating whether the friends list is currently being loaded.
 class FriendList extends StatelessWidget {
+  /// A list of [FriendsType] objects representing the user's friends.
   final List<FriendsType> friends;
+
+  /// A boolean indicating whether the friends list is currently being loaded.
   final bool isLoading;
 
   const FriendList({super.key, required this.friends, required this.isLoading});
@@ -284,13 +302,19 @@ class FriendList extends StatelessWidget {
 /// It also handles loading states and displays appropriate messages when the list is empty.
 ///
 /// Fields:
-/// friendRequests: A list of `FriendsRequestType` objects representing the user's friend requests.
+/// friendRequests: A list of [FriendsRequestType] objects representing the user's friend requests.
 /// isLoading: A boolean indicating whether the friend requests list is currently being loaded.
 /// onRequestHandled: A callback function that is called after a friend request is accepted or rejected,
 /// allowing the parent widget to refresh the lists.
 class FriendRequestList extends StatelessWidget {
+  /// A list of [FriendsRequestType] objects representing the user's friend requests.
   final List<FriendsRequestType> friendRequests;
+
+  /// A boolean indicating whether the friend requests list is currently being loaded.
   final bool isLoading;
+
+  /// A callback function that is called after a friend request is accepted or rejected,
+  /// allowing the parent widget to refresh the lists.
   final VoidCallback? onRequestHandled;
 
   const FriendRequestList({
@@ -302,7 +326,7 @@ class FriendRequestList extends StatelessWidget {
 
   /// Accepts a friend request by sending a PATCH request to the API with the requester's ID.
   ///
-  /// On success, it displays a success message and calls the `onRequestHandled` callback to refresh the lists.
+  /// On success, it displays a success message and calls the [onRequestHandled] callback to refresh the lists.
   ///
   /// On failure, it displays an error message with details from the API response.
   ///
@@ -320,9 +344,11 @@ class FriendRequestList extends StatelessWidget {
       );
 
       if (response.statusCode == 200) {
+        // successfully accepted friend request, refresh lists and show success message.
         toast("Friend request accepted!");
         onRequestHandled?.call();
       } else {
+        // failed to accept friend request, show error message with details from API response.
         final errorMessage =
             jsonDecode(response.body)['message'] ?? 'Unknown error';
         toast(
@@ -336,7 +362,7 @@ class FriendRequestList extends StatelessWidget {
 
   /// Rejects a friend request by sending a DELETE request to the API with the requester's ID.
   ///
-  /// On success, it displays a success message and calls the `onRequestHandled` callback to refresh the lists.
+  /// On success, it displays a success message and calls the [onRequestHandled] callback to refresh the lists.
   ///
   /// On failure, it displays an error message with details from the API response.
   ///
@@ -352,9 +378,11 @@ class FriendRequestList extends StatelessWidget {
       );
 
       if (response.statusCode == 200) {
+        // successfully rejected friend request, refresh lists and show success message.
         toast("Friend request rejected!");
         onRequestHandled?.call();
       } else {
+        // failed to reject friend request, show error message with details from API response.
         final errorMessage =
             jsonDecode(response.body)['message'] ?? 'Unknown error';
         toast(
@@ -417,11 +445,23 @@ class AddFriendForm extends StatefulWidget {
   State<StatefulWidget> createState() => _AddFriendForm();
 }
 
+/// The `_AddFriendForm` class is the stateful implementation of the `AddFriendForm` widget.
+///
+/// It manages the state for the search input, search results, selected user, and loading states during the search and friend request sending processes.
 class _AddFriendForm extends State<AddFriendForm> {
+  /// A controller for the username input text field.
   final TextEditingController _usernameController = TextEditingController();
+
+  /// A list of [FriendsSearchResultType] objects representing the search results for users matching the input username.
   List<FriendsSearchResultType> _searchResults = [];
+
+  /// A boolean indicating whether the "Add" button is currently disabled (i.e., no user is selected).
   bool _isAddButtonDisabled = true;
+
+  /// The ID of the currently selected user from the search results, or null if no user is selected.
   String? _selectedUserId;
+
+  /// The username of the currently selected user from the search results, or null if no user is selected.
   String? _selectedUsername;
 
   @override
@@ -461,7 +501,7 @@ class _AddFriendForm extends State<AddFriendForm> {
     );
     // Handle response and update search results
     if (response.statusCode == 200) {
-      // Parse response and update _searchResults list.
+      // successfully retrieved search results, parse response and update _searchResults list.
       final List<dynamic> body = jsonDecode(response.body)['data'] ?? [];
       final List<FriendsSearchResultType> searchResults = body
           .map((item) => FriendsSearchResultType.fromJson(item))
@@ -475,6 +515,7 @@ class _AddFriendForm extends State<AddFriendForm> {
         _searchResults = [];
       });
     } else {
+      // failed to retrieve search results, show error message with details from API response and clear search results.
       final errorMessage =
           jsonDecode(response.body)['message'] ?? 'Unknown error';
       toast("Failed to search users: ${response.statusCode}\n$errorMessage");
@@ -516,11 +557,13 @@ class _AddFriendForm extends State<AddFriendForm> {
       );
 
       if (response.statusCode == 200) {
+        // successfully sent friend request, show success message and close dialog.
         toast("Friend request sent to $_selectedUsername!");
         if (mounted) {
           Navigator.of(context).pop();
         }
       } else if (response.statusCode == 409) {
+        // A friend request has already been sent to the selected user, show appropriate message.
         // final selectedFriend = _searchResults.firstWhere(
         //   (user) => user.friend_id == _selectedUserId,
         // );
@@ -533,6 +576,7 @@ class _AddFriendForm extends State<AddFriendForm> {
         // }
         toast("A friend request has already been sent to $_selectedUsername.");
       } else {
+        // failed to send friend request, show error message with details from API response.
         final errorMessage =
             jsonDecode(response.body)['message'] ?? 'Unknown error';
         toast(
@@ -565,6 +609,7 @@ class _AddFriendForm extends State<AddFriendForm> {
             if (_searchResults.isNotEmpty)
               SizedBox(
                 height:
+                    // Limit height to show up to 3 results without scrolling, otherwise make it scrollable.
                     60 *
                     (_searchResults.length.toDouble() <= 3
                         ? _searchResults.length.toDouble()

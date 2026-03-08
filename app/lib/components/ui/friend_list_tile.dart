@@ -32,9 +32,13 @@ import 'package:edudoro/color.dart';
 /// );
 /// ```
 class FriendListTile extends StatelessWidget {
+  /// The username of the friend.
   final String username;
   // final String status;
+  /// The daily score of the friend.
   final int score;
+
+  /// A callback function that is called when the unfriend button is pressed.
   final VoidCallback onUnfriend;
 
   const FriendListTile({
@@ -57,6 +61,7 @@ class FriendListTile extends StatelessWidget {
       child: Row(
         children: [
           // Avatar section
+          // TODO(4KV6): Make Avatar Widget. Currently using CircleAvatar as a placeholder.
           CircleAvatar(
             backgroundColor: Theme.of(context).colorScheme.secondary,
             child: Text(username[0].toUpperCase()), // Placeholder for avatar.

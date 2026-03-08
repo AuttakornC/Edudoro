@@ -36,18 +36,22 @@ import 'package:edudoro/color.dart';
 /// );
 /// ```
 class FriendRequestListTile extends StatelessWidget {
+  /// The username of the requester.
   final String username;
   // final String time;
+  /// A callback function that is called when the accept button is pressed.
   final VoidCallback onAccept;
+
+  /// A callback function that is called when the reject button is pressed.
   final VoidCallback onReject;
 
   const FriendRequestListTile({
-    Key? key,
+    super.key,
     required this.username,
     // required this.time,
     required this.onAccept,
     required this.onReject,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

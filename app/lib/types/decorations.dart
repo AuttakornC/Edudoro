@@ -12,8 +12,18 @@ Course: Mobile Application Development Frameworks
 */
 
 /// Defines the types of decorations that can be applied to avatar.
-// ignore: constant_identifier_names
-enum DecorationType { icon, frame, name_color }
+
+enum DecorationType {
+  /// The icon decoration type allows users to customize the icon displayed on their avatar, such as a badge or symbol.
+  icon,
+
+  /// The frame decoration type allows users to customize the border or frame around their avatar image.
+  frame,
+
+  /// The name color decoration type allows users to customize the color of their username displayed in the app.
+  // ignore: constant_identifier_names
+  name_color,
+}
 
 /// The `Decorations` class represents a decoration item that can be applied to an avatar.
 ///
@@ -30,12 +40,15 @@ enum DecorationType { icon, frame, name_color }
 ///
 /// final decorationFromJson = Decorations.fromJson(APIResponseBodyJson);
 /// ```
-/// - The `fromJson` factory constructor allows creating a `Decorations` instance from a JSON map,
+/// - The [fromJson] factory constructor allows creating a `Decorations` instance from a JSON map,
 /// which is useful for parsing API responses.
 class Decorations {
   Decorations({required this.type, required this.detail});
 
+  /// The type of decoration (icon, frame, or name color) represented by the [DecorationType] enum.
   final DecorationType type;
+
+  /// The specific detail of the decoration (e.g., icon name, frame style, or color code).
   final String detail;
 
   /// Factory constructor to create a `Decorations` instance from a JSON map.
