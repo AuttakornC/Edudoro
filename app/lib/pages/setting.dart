@@ -57,6 +57,7 @@ class _SettingPageState extends State<SettingPage> {
     context.read<ClockSettingProvider>().updateWorkTime(workTime);
     context.read<ClockSettingProvider>().updateRestTime(breakTime);
     toast("Saved! Work: ${workTime}m  Break: ${breakTime}m");
+    Navigator.of(context).pushReplacementNamed('/home');
   }
 
   @override
