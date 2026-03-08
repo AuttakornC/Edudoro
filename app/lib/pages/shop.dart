@@ -312,17 +312,17 @@ class _ShopCard extends StatelessWidget {
                       )
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          SVGIcon(
+                        children: [
+                          const SVGIcon(
                             src: "assets/icons/CoinIcon.svg",
                             color: yellow100,
                             width: 14,
                             height: 14,
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
-                            "Buy",
-                            style: TextStyle(
+                            "${item.price}",
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                               color: yellow100,
