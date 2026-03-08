@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:edudoro/components/ui/button.dart';
+import 'package:edudoro/route.dart';
 import 'package:edudoro/utils/http.dart';
 import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
@@ -12,21 +13,24 @@ class SignInPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(48),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(
-                child: Image.asset(
-                  "assets/edudoro-logo.png",
-                  fit: BoxFit.contain,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(48),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: Image.asset(
+                    "assets/edudoro-logo.png",
+                    fit: BoxFit.contain,
+                  ),
                 ),
-              ),
-              SignInForm(),
-            ],
+                SignInForm(),
+              ],
+            ),
           ),
         ),
       ),
@@ -53,11 +57,7 @@ class _SignInForm extends State<SignInForm> {
     super.dispose();
   }
 
-  Future<void> _signIn(
-    BuildContext context,
-    String email,
-    String password,
-  ) async {
+  Future<void> _signIn(String email, String password) async {
     try {
       final response = await fetch(
         "/auth/sign-in",
@@ -77,7 +77,7 @@ class _SignInForm extends State<SignInForm> {
         await storage.write(key: 'jwt_token', value: token);
         toast("Sign In success!!");
         if (!context.mounted) return;
-        Navigator.pushNamed(context, "/home");
+        Nav.goTo("/loading");
       } else if (response.statusCode == 404) {
         toast("This account is not found,");
       } else if (response.statusCode == 401) {
@@ -108,7 +108,7 @@ class _SignInForm extends State<SignInForm> {
       }
 
       _setLoading(true);
-      await _signIn(context, email, password);
+      await _signIn(email, password);
       _setLoading(false);
     }
 

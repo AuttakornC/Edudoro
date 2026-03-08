@@ -15,19 +15,21 @@ class SignUpPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(48),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(
-                child: Image.asset(
-                  "assets/edudoro-logo.png",
-                  fit: BoxFit.contain,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(48),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: Image.asset(
+                    "assets/edudoro-logo.png",
+                    fit: BoxFit.contain,
+                  ),
                 ),
-              ),
-              SignUpForm(),
-            ],
+                SignUpForm(),
+              ],
+            ),
           ),
         ),
       ),
