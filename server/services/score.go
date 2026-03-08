@@ -8,7 +8,7 @@ import (
 func ScoreGetUserScore(db *gorm.DB, account_id string) (int, error) {
 	var account models.Account
 
-	err := db.Model(&models.Account{}).Preload("Scores").First(&account).Error
+	err := db.Model(&models.Account{}).Preload("Scores").Where("account_id = ?", account_id).First(&account).Error
 	if err != nil {
 		return 0, err
 	}
