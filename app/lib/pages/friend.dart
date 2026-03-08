@@ -25,6 +25,7 @@ import 'package:edudoro/utils/toast.dart';
 
 import '../components/ui/friend_list_tile.dart';
 import '../components/ui/friend_req_list_tile.dart';
+import '../components/ui/confirm_dialog.dart';
 
 // Types
 import '../types/friends.dart';
@@ -134,11 +135,11 @@ class _FriendPageView extends State<FriendPageView> {
       if (response.statusCode == 200) {
         // Parse response and update _friends list.
         final List<dynamic> body = jsonDecode(response.body)['data'] ?? [];
-        print("Raw friends data from API: $body");
+        // print("Raw friends data from API: $body");
         final List<FriendsType> friends = body
             .map((item) => FriendsType.fromJson(item))
             .toList();
-        print("Fetched friends: $friends");
+        // print("Fetched friends: $friends");
         setState(() {
           _friends.clear();
           _friends.addAll(friends);
@@ -213,7 +214,14 @@ class _FriendPageView extends State<FriendPageView> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          FriendList(friends: _friends, isLoading: _isLoadingfriends),
+          FriendList(
+            friends: _friends,
+            isLoading: _isLoadingfriends,
+            onUnfriendHandler: () {
+              _fetchFriends();
+              _fetchFriendRequests();
+            },
+          ),
           FriendRequestList(
             friendRequests: _friendRequests,
             isLoading: _isLoadingFriendRequests,
@@ -260,7 +268,40 @@ class FriendList extends StatelessWidget {
   /// A boolean indicating whether the friends list is currently being loaded.
   final bool isLoading;
 
-  const FriendList({super.key, required this.friends, required this.isLoading});
+  /// A callback function that is called when a user is unfriended, allowing the parent widget to refresh the lists.
+  final void Function() onUnfriendHandler;
+
+  const FriendList({
+    super.key,
+    required this.friends,
+    required this.isLoading,
+    required this.onUnfriendHandler,
+  });
+
+  /// Unfriends a user by sending a DELETE request to the API with the friend's account ID.
+  Future<void> _unfriend(String friendAccountId) async {
+    try {
+      final response = await fetch(
+        "/friends/$friendAccountId",
+        HTTPMethod.delete,
+        withAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        // successfully unfriended, show success message.
+        toast("Unfriended successfully!");
+        // Call the onUnfriendHandler callback to refresh the lists.
+        onUnfriendHandler();
+      } else {
+        // failed to unfriend, show error message with details from API response.
+        final errorMessage =
+            jsonDecode(response.body)['message'] ?? 'Unknown error';
+        toast("Failed to unfriend: ${response.statusCode}\n$errorMessage");
+      }
+    } catch (e) {
+      toast("Failed to unfriend: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -288,8 +329,19 @@ class FriendList extends StatelessWidget {
             username: friends[index].username,
             // status: "Online",
             score: friends[index].daily_score,
-            onUnfriend: () {
-              // TODO(4KV6): Implement unfriend functionality.
+            onUnfriend: () async {
+              final bool confirmed =
+                  await showConfirmDialog(
+                    context: context,
+                    message:
+                        "Are you sure you want to unfriend ${friends[index].username}?",
+                    confirmLabel: "Unfriend",
+                    cancelLabel: "Cancel",
+                  ) ??
+                  false;
+              if (confirmed) {
+                _unfriend(friends[index].friend_account_id);
+              }
             },
           ),
         );
@@ -423,8 +475,19 @@ class FriendRequestList extends StatelessWidget {
             onAccept: () {
               _acceptFriendRequest(friendRequests[index].requester_id);
             },
-            onReject: () {
-              _rejectFriendRequest(friendRequests[index].requester_id);
+            onReject: () async {
+              final bool confirmed =
+                  await showConfirmDialog(
+                    context: context,
+                    message:
+                        "Are you sure you want to reject the friend request from ${friendRequests[index].username}?",
+                    confirmLabel: "Reject",
+                    cancelLabel: "Cancel",
+                  ) ??
+                  false;
+              if (confirmed) {
+                _rejectFriendRequest(friendRequests[index].requester_id);
+              }
             },
           ),
         );

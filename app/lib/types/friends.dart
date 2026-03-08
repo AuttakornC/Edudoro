@@ -16,7 +16,7 @@ Course: Mobile Application Development Frameworks
 */
 
 import 'package:edudoro/types/decorations.dart';
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 
 /// The `FriendsType` class represents a friend list item with details.
 ///
@@ -60,9 +60,9 @@ class FriendsType {
   /// Factory constructor to create a `FriendsType` instance from a JSON map.
   /// This is typically used to parse API responses into Dart objects.
   factory FriendsType.fromJson(Map<String, dynamic> json) {
-    if (kDebugMode) {
-      print("Parsing FriendsType from JSON: $json");
-    }
+    // if (kDebugMode) {
+    //   print("Parsing FriendsType from JSON: $json");
+    // }
     return FriendsType(
       friend_account_id: json['friend_account_id'] as String,
       username: json['username'] as String,
