@@ -185,13 +185,13 @@ class _ShopPageState extends State<ShopPage> {
                         if (_icons.isNotEmpty) ...[
                           const _SectionHeader(title: "Avatars"),
                           const SizedBox(height: 12),
-                          _ItemGrid(items: _icons, onBuy: _handleBuy),
+                          _ItemGrid(items: _icons, onBuy: _handleBuy, assetPrefix: 'assets/avatars'),
                           const SizedBox(height: 24),
                         ],
                         if (_frames.isNotEmpty) ...[
                           const _SectionHeader(title: "Frames"),
                           const SizedBox(height: 12),
-                          _ItemGrid(items: _frames, onBuy: _handleBuy),
+                          _ItemGrid(items: _frames, onBuy: _handleBuy, assetPrefix: 'assets/frames'),
                           const SizedBox(height: 24),
                         ],
                         if (_nameColors.isNotEmpty) ...[
@@ -236,8 +236,9 @@ class _SectionHeader extends StatelessWidget {
 class _ItemGrid extends StatelessWidget {
   final List<_ShopItem> items;
   final void Function(_ShopItem) onBuy;
+  final String? assetPrefix;
 
-  const _ItemGrid({required this.items, required this.onBuy});
+  const _ItemGrid({required this.items, required this.onBuy, this.assetPrefix});
 
   @override
   Widget build(BuildContext context) {
@@ -252,7 +253,7 @@ class _ItemGrid extends StatelessWidget {
         childAspectRatio: 0.85,
       ),
       itemBuilder: (context, index) =>
-          _ShopCard(item: items[index], onBuy: onBuy),
+          _ShopCard(item: items[index], onBuy: onBuy, assetPrefix: assetPrefix),
     );
   }
 }
@@ -260,8 +261,9 @@ class _ItemGrid extends StatelessWidget {
 class _ShopCard extends StatelessWidget {
   final _ShopItem item;
   final void Function(_ShopItem) onBuy;
+  final String? assetPrefix;
 
-  const _ShopCard({required this.item, required this.onBuy});
+  const _ShopCard({required this.item, required this.onBuy, this.assetPrefix});
 
   Future<void> _showConfirmDialog(BuildContext context) async {
     if (item.owned) return;
@@ -354,7 +356,14 @@ class _ShopCard extends StatelessWidget {
         ),
       );
     }
-    // SVG asset or remote URL
+    // PNG/image asset (avatar or frame)
+    if (assetPrefix != null) {
+      return Image.asset(
+        '$assetPrefix/${item.detail}',
+        fit: BoxFit.contain,
+      );
+    }
+    // SVG asset
     if (item.detail.endsWith('.svg')) {
       return SVGIcon(src: item.detail, width: 56, height: 56);
     }
