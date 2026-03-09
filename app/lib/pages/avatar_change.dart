@@ -77,7 +77,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
         await fetch(
           "/profile/use",
           HTTPMethod.patch,
-          body: {'decoration_id': _selectedIconId!},
+          body: {'decoration_id': _selectedIconId},
           withAuth: true,
         );
       }
@@ -85,7 +85,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
         await fetch(
           "/profile/use",
           HTTPMethod.patch,
-          body: {'decoration_id': _selectedFrameId!},
+          body: {'decoration_id': _selectedFrameId},
           withAuth: true,
         );
       }
@@ -99,6 +99,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
   Future<void> _showSavedDialog() async {
     if (!mounted) return;
     toast("Saved successfully!");
+    Navigator.of(context).pop();
   }
 
   Widget _buildPreview(String detail, String assetPrefix) {
