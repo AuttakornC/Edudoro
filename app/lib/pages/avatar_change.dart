@@ -3,7 +3,6 @@ import 'package:edudoro/color.dart';
 import 'package:edudoro/utils/http.dart';
 import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
-import '../components/util/svgIcon.dart';
 
 class _DecorationItem {
   final String decorationId;
@@ -102,12 +101,10 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
     toast("Saved successfully!");
   }
 
-  Widget _buildPreview(String detail) {
-    if (detail.endsWith('.svg')) {
-      return SVGIcon(src: detail, width: 48, height: 48);
-    }
-    return const Center(
-      child: Icon(Icons.image_outlined, size: 48, color: primary),
+  Widget _buildPreview(String detail, String assetPrefix) {
+    return Image.asset(
+      '$assetPrefix/$detail',
+      fit: BoxFit.contain,
     );
   }
 
@@ -115,6 +112,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
     required _DecorationItem item,
     required bool selected,
     required VoidCallback onTap,
+    required String assetPrefix,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -129,7 +127,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: _buildPreview(item.detail),
+          child: _buildPreview(item.detail, assetPrefix),
         ),
       ),
     );
@@ -139,6 +137,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
     required List<_DecorationItem> items,
     required String? selectedId,
     required Function(String) onSelect,
+    required String assetPrefix,
   }) {
     if (items.isEmpty) {
       return const Padding(
@@ -165,6 +164,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
         item: items[i],
         selected: selectedId == items[i].decorationId,
         onTap: () => setState(() => onSelect(items[i].decorationId)),
+        assetPrefix: assetPrefix,
       ),
     );
   }
@@ -224,6 +224,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
                 items: _icons,
                 selectedId: _selectedIconId,
                 onSelect: (id) => _selectedIconId = id,
+                assetPrefix: 'assets/avatars',
               ),
               const SizedBox(height: 24),
               const Text(
@@ -240,6 +241,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
                 items: _frames,
                 selectedId: _selectedFrameId,
                 onSelect: (id) => _selectedFrameId = id,
+                assetPrefix: 'assets/frames',
               ),
               const SizedBox(height: 40),
             ],
