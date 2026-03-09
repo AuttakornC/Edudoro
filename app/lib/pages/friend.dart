@@ -211,24 +211,31 @@ class _FriendPageView extends State<FriendPageView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
+      // Use IndexedStack to switch between friends list and friend requests list based on the selected index.
+      // And use FadeThroughPageRoute for smooth transition between the two views.
+      body: FadeIndexedStack(
+        duration: const Duration(milliseconds: 150),
         index: _selectedIndex,
         children: [
           FriendList(
             friends: _friends,
             isLoading: _isLoadingfriends,
             onUnfriendHandler: () {
+              // Refresh both lists after unfriending to reflect changes in friend requests and friends list.
               _fetchFriends();
               _fetchFriendRequests();
             },
+            onRefreshFriends: _fetchFriends,
           ),
           FriendRequestList(
             friendRequests: _friendRequests,
             isLoading: _isLoadingFriendRequests,
             onRequestHandled: () {
+              // Refresh both lists after handling a friend request to reflect changes in friend requests and friends list.
               _fetchFriends();
               _fetchFriendRequests();
             },
+            onRefreshFriendRequests: _fetchFriendRequests,
           ),
         ],
       ),
@@ -271,11 +278,15 @@ class FriendList extends StatelessWidget {
   /// A callback function that is called when a user is unfriended, allowing the parent widget to refresh the lists.
   final void Function() onUnfriendHandler;
 
+  /// A callback function that is called to refresh the friends list when user pulls to refresh, allowing the parent widget to fetch the latest data from the API.
+  final Future<void> Function() onRefreshFriends;
+
   const FriendList({
     super.key,
     required this.friends,
     required this.isLoading,
     required this.onUnfriendHandler,
+    required this.onRefreshFriends,
   });
 
   /// Unfriends a user by sending a DELETE request to the API with the friend's account ID.
@@ -320,32 +331,42 @@ class FriendList extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
-      itemCount: friends.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: FriendListTile(
-            username: friends[index].username,
-            // status: "Online",
-            score: friends[index].daily_score,
-            onUnfriend: () async {
-              final bool confirmed =
-                  await showConfirmDialog(
-                    context: context,
-                    message:
-                        "Are you sure you want to unfriend ${friends[index].username}?",
-                    confirmLabel: "Unfriend",
-                    cancelLabel: "Cancel",
-                  ) ??
-                  false;
-              if (confirmed) {
-                _unfriend(friends[index].friend_account_id);
-              }
-            },
-          ),
-        );
+    // Display the list of friends with pull-to-refresh functionality. Each friend item includes an option to unfriend,
+    // which triggers a confirmation dialog before proceeding with the unfriending action.
+    return RefreshIndicator(
+      onRefresh: onRefreshFriends,
+      notificationPredicate: (notification) {
+        // Only trigger refresh when the user is at the top of the list.
+        return notification.metrics.pixels ==
+            notification.metrics.minScrollExtent;
       },
+      child: ListView.builder(
+        itemCount: friends.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: FriendListTile(
+              username: friends[index].username,
+              // status: "Online",
+              score: friends[index].daily_score,
+              onUnfriend: () async {
+                final bool confirmed =
+                    await showConfirmDialog(
+                      context: context,
+                      message:
+                          "Are you sure you want to unfriend ${friends[index].username}?",
+                      confirmLabel: "Unfriend",
+                      cancelLabel: "Cancel",
+                    ) ??
+                    false;
+                if (confirmed) {
+                  _unfriend(friends[index].friend_account_id);
+                }
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -369,11 +390,15 @@ class FriendRequestList extends StatelessWidget {
   /// allowing the parent widget to refresh the lists.
   final VoidCallback? onRequestHandled;
 
+  /// A callback function that is called to refresh the friend requests list when user pulls to refresh, allowing the parent widget to fetch the latest data from the API.
+  final Future<void> Function() onRefreshFriendRequests;
+
   const FriendRequestList({
     super.key,
     required this.friendRequests,
     required this.isLoading,
     required this.onRequestHandled,
+    required this.onRefreshFriendRequests,
   });
 
   /// Accepts a friend request by sending a PATCH request to the API with the requester's ID.
@@ -463,35 +488,43 @@ class FriendRequestList extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
-      itemCount: friendRequests.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: FriendRequestListTile(
-            username: friendRequests[index].username,
-            // time:
-            //     "2024-06-01 12:00", // TODO(4KV6): Replace with actual request time.
-            onAccept: () {
-              _acceptFriendRequest(friendRequests[index].requester_id);
-            },
-            onReject: () async {
-              final bool confirmed =
-                  await showConfirmDialog(
-                    context: context,
-                    message:
-                        "Are you sure you want to reject the friend request from ${friendRequests[index].username}?",
-                    confirmLabel: "Reject",
-                    cancelLabel: "Cancel",
-                  ) ??
-                  false;
-              if (confirmed) {
-                _rejectFriendRequest(friendRequests[index].requester_id);
-              }
-            },
-          ),
-        );
+    return RefreshIndicator(
+      onRefresh: onRefreshFriendRequests,
+      notificationPredicate: (notification) {
+        // Only trigger refresh when the user is at the top of the list.
+        return notification.metrics.pixels ==
+            notification.metrics.minScrollExtent;
       },
+      child: ListView.builder(
+        itemCount: friendRequests.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: FriendRequestListTile(
+              username: friendRequests[index].username,
+              // time:
+              //     "2024-06-01 12:00", // TODO(4KV6): Replace with actual request time.
+              onAccept: () {
+                _acceptFriendRequest(friendRequests[index].requester_id);
+              },
+              onReject: () async {
+                final bool confirmed =
+                    await showConfirmDialog(
+                      context: context,
+                      message:
+                          "Are you sure you want to reject the friend request from ${friendRequests[index].username}?",
+                      confirmLabel: "Reject",
+                      cancelLabel: "Cancel",
+                    ) ??
+                    false;
+                if (confirmed) {
+                  _rejectFriendRequest(friendRequests[index].requester_id);
+                }
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -638,6 +671,18 @@ class _AddFriendForm extends State<AddFriendForm> {
         //   );
         // }
         toast("A friend request has already been sent to $_selectedUsername.");
+      } else if (response.statusCode == 404) {
+        // The selected user was not found, show appropriate message and clear search results.
+        toast("User not found. Please try searching again.");
+        setState(() {
+          _searchResults = [];
+          _isAddButtonDisabled = true;
+        });
+      } else if (response.statusCode == 400) {
+        // Bad request, likely due to invalid input, show appropriate message.
+        final errorMessage =
+            jsonDecode(response.body)['message'] ?? 'Unknown error';
+        toast("Failed to send friend request: $errorMessage");
       } else {
         // failed to send friend request, show error message with details from API response.
         final errorMessage =
@@ -749,6 +794,59 @@ class _AddFriendForm extends State<AddFriendForm> {
           child: Text("Cancel"),
         ),
       ],
+    );
+  }
+}
+
+/// The `FadeIndexedStack` widget is a custom implementation of an IndexedStack that adds a fade transition effect when switching between child widgets.
+///
+/// It takes an `index` to determine which child to display, a list of `children` widgets, and a `duration` for the fade transition effect.
+/// When the `index` changes, the widget will fade out the currently visible child and fade in the new child corresponding to the new index.
+///
+/// Fields:
+/// - index: The index of the child widget to display.
+/// - children: A list of child widgets to be displayed based on the index.
+/// - duration: The duration of the fade transition effect when switching between child widgets (default is 300 milliseconds).
+///
+/// Usage:
+/// ```dart
+/// FadeIndexedStack(
+///   index: _selectedIndex,
+///   children: [
+///     FriendList(...),
+///     FriendRequestList(...),
+///   ],
+///   duration: Duration(milliseconds: 150),
+/// );
+/// ```
+class FadeIndexedStack extends StatelessWidget {
+  /// The index of the child widget to display.
+  final int index;
+
+  /// A list of child widgets to be displayed based on the index.
+  final List<Widget> children;
+
+  /// The duration of the fade transition effect when switching between child widgets (default is 300 milliseconds).
+  final Duration duration;
+
+  const FadeIndexedStack({
+    super.key,
+    required this.index,
+    required this.children,
+    this.duration = const Duration(milliseconds: 300),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: List.generate(children.length, (i) {
+        // Each child is wrapped in an AnimatedOpacity widget to create the fade effect.
+        return AnimatedOpacity(
+          opacity: i == index ? 1.0 : 0.0,
+          duration: duration,
+          child: IgnorePointer(ignoring: i != index, child: children[i]),
+        );
+      }),
     );
   }
 }
