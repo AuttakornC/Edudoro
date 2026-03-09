@@ -18,6 +18,7 @@ Course: Mobile Application Development Frameworks
 import 'dart:convert';
 
 import 'package:edudoro/color.dart';
+import 'package:edudoro/components/util/color_hex_converter.dart';
 import 'package:edudoro/types/decorations.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +28,7 @@ import 'package:edudoro/utils/toast.dart';
 import '../components/ui/friend_list_tile.dart';
 import '../components/ui/friend_req_list_tile.dart';
 import '../components/ui/confirm_dialog.dart';
+import '../components/ui/decoration_display.dart';
 
 // Types
 import '../types/friends.dart';
@@ -778,6 +780,80 @@ class _AddFriendForm extends State<AddFriendForm> {
                       child: ListTile(
                         selectedColor: primary,
                         selected: user.friend_id == _selectedUserId,
+                        leading:
+                            user.decorations
+                                        ?.where(
+                                          (d) => d.type == DecorationType.icon,
+                                        )
+                                        .firstOrNull !=
+                                    null ||
+                                user.decorations
+                                        ?.where(
+                                          (d) => d.type == DecorationType.frame,
+                                        )
+                                        .firstOrNull !=
+                                    null
+                            ? Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: secondary,
+                                ),
+                                child: DecorationDisplay(
+                                  avatar: user.decorations
+                                      ?.where(
+                                        (d) => d.type == DecorationType.icon,
+                                      )
+                                      .firstOrNull,
+                                  frame: user.decorations
+                                      ?.where(
+                                        (d) => d.type == DecorationType.frame,
+                                      )
+                                      .firstOrNull,
+                                  size: 38,
+                                ),
+                              )
+                            : Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: secondary,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    user.username.isNotEmpty
+                                        ? user.username[0].toUpperCase()
+                                        : "?",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          user.decorations
+                                                  ?.where(
+                                                    (d) =>
+                                                        d.type ==
+                                                        DecorationType
+                                                            .name_color,
+                                                  )
+                                                  .firstOrNull !=
+                                              null
+                                          ? hexToColor(
+                                              user.decorations!
+                                                  .where(
+                                                    (d) =>
+                                                        d.type ==
+                                                        DecorationType
+                                                            .name_color,
+                                                  )
+                                                  .first
+                                                  .detail,
+                                            )
+                                          : primary,
+                                    ),
+                                  ),
+                                ),
+                              ),
                         title: Text(user.username),
                         // subtitle: Text("Score: ${user.daily_score}"),
                         trailing: user.friend_id == _selectedUserId
