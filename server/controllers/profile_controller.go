@@ -143,30 +143,3 @@ func ProfileUseDecocation(c *gin.Context) {
 		"message": "success",
 	})
 }
-
-func ProfileGetMe(c *gin.Context) {
-    accountId, _ := c.Get("account_id")
-
-    var account models.Account
-    err := models.DB.Select("account_id, email, username").
-        Where("account_id = ?", accountId.(string)).
-        First(&account).Error
-
-    if err != nil {
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            utils.RequestErrorHandlers(c, http.StatusNotFound, errors.New("user_not_found"))
-            return
-        }
-        utils.RequestErrorHandlers(c, http.StatusInternalServerError, err)
-        return
-    }
-
-    c.JSON(http.StatusOK, gin.H{
-        "message": "success",
-        "data": gin.H{
-            "account_id": account.AccountId,
-            "username":   account.Username,
-            "email":      account.Email,
-        },
-    })
-}

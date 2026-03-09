@@ -17,11 +17,6 @@ func main() {
 
 	models.ConnectDatabase()
 
-	err = models.SeedDatabase(models.DB)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	r := routes.SetupRouter()
 	r.Run(":" + os.Getenv("PORT"))
 }
