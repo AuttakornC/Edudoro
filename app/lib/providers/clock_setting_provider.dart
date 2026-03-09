@@ -41,13 +41,17 @@ class ClockSettingProvider extends ChangeNotifier {
     });
 
     String? workTimeStr = await storage.read(key: "work_time");
-    double? workTimeParsed = double.tryParse(workTimeStr ?? "");
+    double? workTimeParsed = double.tryParse(
+      workTimeStr ?? (25 * 60).toString(),
+    );
     if (workTimeParsed != null) {
       _workTime = workTimeParsed;
     }
 
     String? restTimeStr = await storage.read(key: "rest_time");
-    double? restTimeParsed = double.tryParse(restTimeStr ?? "");
+    double? restTimeParsed = double.tryParse(
+      restTimeStr ?? (5 * 60).toString(),
+    );
     if (restTimeParsed != null) {
       _restTime = restTimeParsed;
     }
