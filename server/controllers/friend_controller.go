@@ -49,18 +49,18 @@ func FriendAcceptedQuery(c *gin.Context) {
 		return
 	}
 
-	var FriendsList []friendAcceptResponse
+	var friendsList []friendAcceptResponse
 
 	for _, friend := range account.FriendsFromRequest {
 		var friendTodayScore int = 0
 		for _, scoreHistory := range friend.Friend.Scores {
 			friendTodayScore += scoreHistory.Score
 		}
-		var decorations []friendDecoration
+		decorations := []friendDecoration{}
 		for _, decoration := range friend.Friend.Decorations {
 			decorations = append(decorations, friendDecoration{Type: decoration.Decoration.Type, Detail: decoration.Decoration.Detail})
 		}
-		FriendsList = append(FriendsList, friendAcceptResponse{FriendId: friend.FriendId, FriendAt: *friend.AcceptedAt, DailyScore: friendTodayScore, Username: friend.Friend.Username, Decorations: decorations})
+		friendsList = append(friendsList, friendAcceptResponse{FriendId: friend.FriendId, FriendAt: *friend.AcceptedAt, DailyScore: friendTodayScore, Username: friend.Friend.Username, Decorations: decorations})
 	}
 
 	for _, friend := range account.FriendsFromAcception {
@@ -68,20 +68,20 @@ func FriendAcceptedQuery(c *gin.Context) {
 		for _, scoreHistory := range friend.Requester.Scores {
 			friendTodayScore += scoreHistory.Score
 		}
-		var decorations []friendDecoration
+		decorations := []friendDecoration{}
 		for _, decoration := range friend.Requester.Decorations {
 			decorations = append(decorations, friendDecoration{Type: decoration.Decoration.Type, Detail: decoration.Decoration.Detail})
 		}
-		FriendsList = append(FriendsList, friendAcceptResponse{FriendId: friend.RequesterId, FriendAt: *friend.AcceptedAt, DailyScore: friendTodayScore, Username: friend.Requester.Username, Decorations: decorations})
+		friendsList = append(friendsList, friendAcceptResponse{FriendId: friend.RequesterId, FriendAt: *friend.AcceptedAt, DailyScore: friendTodayScore, Username: friend.Requester.Username, Decorations: decorations})
 	}
 
-	slices.SortFunc(FriendsList, func(a, b friendAcceptResponse) int {
+	slices.SortFunc(friendsList, func(a, b friendAcceptResponse) int {
 		return b.DailyScore - a.DailyScore
 	})
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
-		"data":    FriendsList,
+		"data":    friendsList,
 	})
 }
 
