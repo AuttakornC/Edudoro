@@ -54,6 +54,9 @@ class _ProfilePageState extends State<ProfilePage> {
   /// Currently equipped frame decoration.
   Decorations? _frame;
 
+  /// Currently equipped name color.
+  Color? _nameColor;
+
   /// Whether the profile data is currently being fetched.
   bool _isLoading = false;
 
@@ -61,6 +64,15 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     Future.microtask(_loadUserInfo);
+  }
+
+  Color _parseHexColor(String hex) {
+    final cleaned = hex.replaceFirst('#', '');
+    final value = int.tryParse(
+      cleaned.length == 6 ? 'FF$cleaned' : cleaned,
+      radix: 16,
+    );
+    return value != null ? Color(value) : primary;
   }
 
   /// Fetches the current user's username and email from [GET /api/v1/profile].
@@ -71,7 +83,7 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => _isLoading = true);
     try {
       final response = await fetch(
-        "/profile",
+        "/profile/me",
         HTTPMethod.get,
         withAuth: true,
       );
@@ -91,6 +103,12 @@ class _ProfilePageState extends State<ProfilePage> {
               .cast<Map<String, dynamic>>()
               .where((d) => d['type'] == 'frame')
               .map((d) => Decorations(type: DecorationType.frame, detail: d['detail'] as String))
+              .firstOrNull;
+
+          _nameColor = decorations
+              .cast<Map<String, dynamic>>()
+              .where((d) => d['type'] == 'name_color')
+              .map((d) => _parseHexColor(d['detail'] as String))
               .firstOrNull;
         });
       }
@@ -182,7 +200,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: colors.primary,
+                    color: _nameColor ?? colors.primary,
                   ),
                 ),
 

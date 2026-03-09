@@ -27,10 +27,12 @@ class AvatarChangePage extends StatefulWidget {
 class _AvatarChangePageState extends State<AvatarChangePage> {
   List<_DecorationItem> _icons = [];
   List<_DecorationItem> _frames = [];
+  List<_DecorationItem> _nameColors = [];
   bool _isLoading = false;
 
   String? _selectedIconId;
   String? _selectedFrameId;
+  String? _selectedNameColorId;
 
   @override
   void initState() {
@@ -47,7 +49,6 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
         withAuth: true,
       );
       final body = jsonDecode(response.body);
-      print(body['data']);
       if (response.statusCode == 200) {
         final data = body['data'];
         setState(() {
@@ -56,6 +57,10 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
               .map((e) => _DecorationItem.fromJson(e as Map<String, dynamic>))
               .toList();
           _frames = (data['frames'] as List)
+              .where((e) => e['owned'] == true)
+              .map((e) => _DecorationItem.fromJson(e as Map<String, dynamic>))
+              .toList();
+          _nameColors = (data['name_colors'] as List)
               .where((e) => e['owned'] == true)
               .map((e) => _DecorationItem.fromJson(e as Map<String, dynamic>))
               .toList();
@@ -70,7 +75,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
   }
 
   Future<void> _save() async {
-    if (_selectedIconId == null && _selectedFrameId == null) return;
+    if (_selectedIconId == null && _selectedFrameId == null && _selectedNameColorId == null) return;
 
     try {
       if (_selectedIconId != null) {
@@ -89,23 +94,58 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
           withAuth: true,
         );
       }
+      if (_selectedNameColorId != null) {
+        await fetch(
+          "/profile/use",
+          HTTPMethod.patch,
+          body: {'decoration_id': _selectedNameColorId},
+          withAuth: true,
+        );
+      }
       if (!mounted) return;
-      await _showSavedDialog();
+      toast("Saved successfully!");
     } catch (e) {
       toast("Something went wrong. $e");
     }
   }
 
-  Future<void> _showSavedDialog() async {
-    if (!mounted) return;
-    toast("Saved successfully!");
-    Navigator.of(context).pop();
+  Color _parseHexColor(String hex) {
+    final cleaned = hex.replaceFirst('#', '');
+    final value = int.tryParse(
+      cleaned.length == 6 ? 'FF$cleaned' : cleaned,
+      radix: 16,
+    );
+    return value != null ? Color(value) : primary;
   }
 
-  Widget _buildPreview(String detail, String assetPrefix) {
-    return Image.asset(
-      '$assetPrefix/$detail',
-      fit: BoxFit.contain,
+  Widget _buildPreview(String detail, {String? assetPrefix}) {
+    if (assetPrefix != null) {
+      return Image.asset(
+        '$assetPrefix/$detail',
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => const Icon(
+          Icons.image_outlined,
+          size: 48,
+          color: primary,
+        ),
+      );
+    }
+    // name_color
+    if (detail.startsWith('#')) {
+      return Center(
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: _parseHexColor(detail),
+            shape: BoxShape.circle,
+            border: Border.all(color: primary, width: 2),
+          ),
+        ),
+      );
+    }
+    return const Center(
+      child: Icon(Icons.image_outlined, size: 48, color: primary),
     );
   }
 
@@ -113,7 +153,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
     required _DecorationItem item,
     required bool selected,
     required VoidCallback onTap,
-    required String assetPrefix,
+    String? assetPrefix,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -128,7 +168,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: _buildPreview(item.detail, assetPrefix),
+          child: _buildPreview(item.detail, assetPrefix: assetPrefix),
         ),
       ),
     );
@@ -138,7 +178,7 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
     required List<_DecorationItem> items,
     required String? selectedId,
     required Function(String) onSelect,
-    required String assetPrefix,
+    String? assetPrefix,
   }) {
     if (items.isEmpty) {
       return const Padding(
@@ -172,8 +212,9 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool hasSelection =
-        _selectedIconId != null || _selectedFrameId != null;
+    final bool hasSelection = _selectedIconId != null ||
+        _selectedFrameId != null ||
+        _selectedNameColorId != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -243,6 +284,22 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
                 selectedId: _selectedFrameId,
                 onSelect: (id) => _selectedFrameId = id,
                 assetPrefix: 'assets/frames',
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                "Name Colors",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: primary,
+                ),
+              ),
+              const Divider(color: primary, thickness: 4),
+              const SizedBox(height: 12),
+              _grid(
+                items: _nameColors,
+                selectedId: _selectedNameColorId,
+                onSelect: (id) => _selectedNameColorId = id,
               ),
               const SizedBox(height: 40),
             ],
