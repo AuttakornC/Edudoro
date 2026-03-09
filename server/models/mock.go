@@ -23,11 +23,27 @@ func SeedDatabase(db *gorm.DB) error {
 	rand.Seed(time.Now().UnixNano())
 
 	// 1. Seed Decorations (The Catalog)
+	// Detail values must match the filenames under assets/avatars/ and assets/frames/.
 	decorations := []Decoration{
-		{Type: DecorationIconType, Detail: "fire_emblem", Price: 150},
-		{Type: DecorationIconType, Detail: "water_drop", Price: 150},
-		{Type: DecorationFrameType, Detail: "golden_luxury", Price: 2000},
-		{Type: DecorationNameColorType, Detail: "#F54927", Price: 500},
+		{Type: DecorationIconType, Detail: "Avatar1.png", Price: 0},
+		{Type: DecorationIconType, Detail: "Avatar2.png", Price: 150},
+		{Type: DecorationIconType, Detail: "Avatar3.png", Price: 150},
+		{Type: DecorationIconType, Detail: "Avatar4.png", Price: 300},
+		{Type: DecorationIconType, Detail: "Avatar5.png", Price: 500},
+		{Type: DecorationIconType, Detail: "Avatar6.png", Price: 500},
+		{Type: DecorationFrameType, Detail: "Frame1.png", Price: 0},
+		{Type: DecorationFrameType, Detail: "Frame2.png", Price: 200},
+		{Type: DecorationFrameType, Detail: "Frame3.png", Price: 200},
+		{Type: DecorationFrameType, Detail: "Frame4.png", Price: 400},
+		{Type: DecorationFrameType, Detail: "Frame5.png", Price: 400},
+		{Type: DecorationFrameType, Detail: "Frame6.png", Price: 800},
+		{Type: DecorationFrameType, Detail: "Frame7.png", Price: 800},
+		{Type: DecorationFrameType, Detail: "Frame8.png", Price: 2000},
+		{Type: DecorationNameColorType, Detail: "#ffffff", Price: 100},
+		{Type: DecorationNameColorType, Detail: "#0095ff", Price: 200},
+		{Type: DecorationNameColorType, Detail: "#04ff00", Price: 200},
+		{Type: DecorationNameColorType, Detail: "#ff00ee", Price: 300},
+		{Type: DecorationNameColorType, Detail: "#ffb700", Price: 500},
 	}
 	if err := db.Create(&decorations).Error; err != nil {
 		return err
