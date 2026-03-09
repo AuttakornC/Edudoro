@@ -18,6 +18,7 @@ Course: Mobile Application Development Frameworks
 import 'dart:convert';
 
 import 'package:edudoro/color.dart';
+import 'package:edudoro/types/decorations.dart';
 import 'package:flutter/material.dart';
 
 import 'package:edudoro/utils/http.dart';
@@ -268,6 +269,10 @@ class _FriendPageView extends State<FriendPageView> {
 /// Fields:
 /// friends: A list of [FriendsType] objects representing the user's friends.
 /// isLoading: A boolean indicating whether the friends list is currently being loaded.
+/// onUnfriendHandler: A callback function that is called when a user is unfriended,
+/// allowing the parent widget to refresh the lists.
+/// onRefreshFriends: A callback function that is called to refresh the friends list when user pulls to refresh,
+/// allowing the parent widget to fetch the latest data from the API.
 class FriendList extends StatelessWidget {
   /// A list of [FriendsType] objects representing the user's friends.
   final List<FriendsType> friends;
@@ -324,9 +329,16 @@ class FriendList extends StatelessWidget {
     // Handle empty state
     if (friends.isEmpty && !isLoading) {
       return Center(
-        child: Text(
-          "No friends yet. Add some friends to see them here!",
-          style: TextStyle(fontSize: 16, color: secondary),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "No friends yet.",
+              style: TextStyle(fontSize: 16, color: secondary),
+            ),
+            SizedBox(height: 8),
+            ElevatedButton(onPressed: onRefreshFriends, child: Text("Refresh")),
+          ],
         ),
       );
     }
@@ -349,6 +361,12 @@ class FriendList extends StatelessWidget {
               username: friends[index].username,
               // status: "Online",
               score: friends[index].daily_score,
+              avatar: friends[index].decorations
+                  ?.where((d) => d.type == DecorationType.icon)
+                  .firstOrNull,
+              frame: friends[index].decorations
+                  ?.where((d) => d.type == DecorationType.frame)
+                  .firstOrNull,
               onUnfriend: () async {
                 final bool confirmed =
                     await showConfirmDialog(
@@ -379,6 +397,8 @@ class FriendList extends StatelessWidget {
 /// isLoading: A boolean indicating whether the friend requests list is currently being loaded.
 /// onRequestHandled: A callback function that is called after a friend request is accepted or rejected,
 /// allowing the parent widget to refresh the lists.
+/// onRefreshFriendRequests: A callback function that is called to refresh the friend requests list when user pulls to refresh,
+/// allowing the parent widget to fetch the latest data from the API.
 class FriendRequestList extends StatelessWidget {
   /// A list of [FriendsRequestType] objects representing the user's friend requests.
   final List<FriendsRequestType> friendRequests;
@@ -481,9 +501,19 @@ class FriendRequestList extends StatelessWidget {
     // Handle empty state
     if (friendRequests.isEmpty && !isLoading) {
       return Center(
-        child: Text(
-          "No friend requests yet.",
-          style: TextStyle(fontSize: 16, color: secondary),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "No friend requests.",
+              style: TextStyle(fontSize: 16, color: secondary),
+            ),
+            SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: onRefreshFriendRequests,
+              child: Text("Refresh"),
+            ),
+          ],
         ),
       );
     }
@@ -503,8 +533,15 @@ class FriendRequestList extends StatelessWidget {
             child: FriendRequestListTile(
               username: friendRequests[index].username,
               // time:
-              //     "2024-06-01 12:00", // TODO(4KV6): Replace with actual request time.
+              //     "2024-06-01 12:00",
+              avatar: friendRequests[index].decorations
+                  ?.where((d) => d.type == DecorationType.icon)
+                  .firstOrNull,
+              frame: friendRequests[index].decorations
+                  ?.where((d) => d.type == DecorationType.frame)
+                  .firstOrNull,
               onAccept: () {
+                toast("Accepting friend request...");
                 _acceptFriendRequest(friendRequests[index].requester_id);
               },
               onReject: () async {

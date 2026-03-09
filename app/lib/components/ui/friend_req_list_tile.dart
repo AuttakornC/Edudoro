@@ -11,8 +11,12 @@ Author: 4KV6
 Course: Mobile Application Development Frameworks
 */
 
+import 'package:edudoro/color.dart' as colors;
+import 'package:edudoro/types/decorations.dart';
 import 'package:flutter/material.dart';
 import 'package:edudoro/color.dart';
+
+import 'decoration_display.dart';
 
 /// The `FriendRequestListTile` widget represents a single friend request item in the friend request list.
 /// It displays the requester's username, the time of the request,
@@ -45,12 +49,20 @@ class FriendRequestListTile extends StatelessWidget {
   /// A callback function that is called when the reject button is pressed.
   final VoidCallback onReject;
 
+  /// The avatar decoration of the requester. Optional.
+  final Decorations? avatar;
+
+  /// The frame decoration of the requester. Optional.
+  final Decorations? frame;
+
   const FriendRequestListTile({
     super.key,
     required this.username,
     // required this.time,
     required this.onAccept,
     required this.onReject,
+    this.avatar,
+    this.frame,
   });
 
   @override
@@ -65,10 +77,34 @@ class FriendRequestListTile extends StatelessWidget {
       child: Row(
         children: [
           // Avatar section
-          CircleAvatar(
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-            child: Text(username[0].toUpperCase()), // Placeholder for avatar.
-          ),
+          if (avatar != null || frame != null)
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.secondary,
+              ),
+              child: DecorationDisplay(avatar: avatar, frame: frame, size: 48),
+            )
+          else
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.secondary,
+              ),
+              child: Center(
+                child: Text(
+                  username.isNotEmpty ? username[0].toUpperCase() : "?",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: primary,
+                  ),
+                ),
+              ),
+            ),
           const SizedBox(width: 16),
           // Username section
           Expanded(
