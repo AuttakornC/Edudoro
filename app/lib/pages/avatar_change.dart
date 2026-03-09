@@ -1,5 +1,22 @@
+import 'dart:convert';
+import 'package:edudoro/color.dart';
+import 'package:edudoro/utils/http.dart';
+import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
-import '../color.dart';
+import '../components/util/svgIcon.dart';
+
+class _DecorationItem {
+  final String decorationId;
+  final String detail;
+
+  _DecorationItem({required this.decorationId, required this.detail});
+
+  factory _DecorationItem.fromJson(Map<String, dynamic> json) =>
+      _DecorationItem(
+        decorationId: json['decoration_id'] as String,
+        detail: json['detail'] as String,
+      );
+}
 
 class AvatarChangePage extends StatefulWidget {
   const AvatarChangePage({super.key});
@@ -9,52 +26,93 @@ class AvatarChangePage extends StatefulWidget {
 }
 
 class _AvatarChangePageState extends State<AvatarChangePage> {
-  int? selectedAvatar;
-  int? selectedFrame;
+  List<_DecorationItem> _icons = [];
+  List<_DecorationItem> _frames = [];
+  bool _isLoading = false;
+
+  String? _selectedIconId;
+  String? _selectedFrameId;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_fetchOwnedDecorations);
+  }
+
+  Future<void> _fetchOwnedDecorations() async {
+    setState(() => _isLoading = true);
+    try {
+      final response = await fetch(
+        "/shop/decorations",
+        HTTPMethod.get,
+        withAuth: true,
+      );
+      final body = jsonDecode(response.body);
+      print(body['data']);
+      if (response.statusCode == 200) {
+        final data = body['data'];
+        setState(() {
+          _icons = (data['icons'] as List)
+              .where((e) => e['owned'] == true)
+              .map((e) => _DecorationItem.fromJson(e as Map<String, dynamic>))
+              .toList();
+          _frames = (data['frames'] as List)
+              .where((e) => e['owned'] == true)
+              .map((e) => _DecorationItem.fromJson(e as Map<String, dynamic>))
+              .toList();
+        });
+      } else {
+        toast("Failed to load decorations.");
+      }
+    } catch (e) {
+      toast("Something went wrong. $e");
+    }
+    setState(() => _isLoading = false);
+  }
+
+  Future<void> _save() async {
+    if (_selectedIconId == null && _selectedFrameId == null) return;
+
+    try {
+      if (_selectedIconId != null) {
+        await fetch(
+          "/profile/use",
+          HTTPMethod.patch,
+          body: {'decoration_id': _selectedIconId!},
+          withAuth: true,
+        );
+      }
+      if (_selectedFrameId != null) {
+        await fetch(
+          "/profile/use",
+          HTTPMethod.patch,
+          body: {'decoration_id': _selectedFrameId!},
+          withAuth: true,
+        );
+      }
+      if (!mounted) return;
+      await _showSavedDialog();
+    } catch (e) {
+      toast("Something went wrong. $e");
+    }
+  }
 
   Future<void> _showSavedDialog() async {
-    await showDialog(
-      context: context,
-      barrierColor: Colors.black38,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: secondary,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Saved successfully",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: primary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primary,
-                  foregroundColor: white,
-                ),
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                  Navigator.pop(context, {
-                    "avatar": selectedAvatar,
-                    "frame": selectedFrame,
-                  });
-                },
-                child: const Text("OK"),
-              ),
-            ],
-          ),
-        ),
-      ),
+    if (!mounted) return;
+    toast("Saved successfully!");
+  }
+
+  Widget _buildPreview(String detail) {
+    if (detail.endsWith('.svg')) {
+      return SVGIcon(src: detail, width: 48, height: 48);
+    }
+    return const Center(
+      child: Icon(Icons.image_outlined, size: 48, color: primary),
     );
   }
 
   Widget _card({
+    required _DecorationItem item,
     required bool selected,
     required VoidCallback onTap,
   }) {
@@ -69,26 +127,34 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
             width: 3,
           ),
         ),
-        child: const Center(
-          child: Icon(
-            Icons.image_outlined,
-            size: 48,
-            color: primary,
-          ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: _buildPreview(item.detail),
         ),
       ),
     );
   }
 
   Widget _grid({
-    required int count,
-    required int? selected,
-    required Function(int) onSelect,
+    required List<_DecorationItem> items,
+    required String? selectedId,
+    required Function(String) onSelect,
   }) {
+    if (items.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: Text(
+            "No items owned yet",
+            style: TextStyle(color: primary),
+          ),
+        ),
+      );
+    }
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: count,
+      itemCount: items.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 8,
@@ -96,14 +162,18 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
         childAspectRatio: 0.85,
       ),
       itemBuilder: (_, i) => _card(
-        selected: selected == i,
-        onTap: () => setState(() => onSelect(i)),
+        item: items[i],
+        selected: selectedId == items[i].decorationId,
+        onTap: () => setState(() => onSelect(items[i].decorationId)),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool hasSelection =
+        _selectedIconId != null || _selectedFrameId != null;
+
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(color: primary),
@@ -116,9 +186,9 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
           ),
         ),
         actions: [
-          if (selectedAvatar != null || selectedFrame != null)
+          if (hasSelection)
             TextButton(
-              onPressed: _showSavedDialog,
+              onPressed: _save,
               child: const Text(
                 "SAVE",
                 style: TextStyle(
@@ -130,8 +200,13 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 16,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -145,15 +220,12 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
               ),
               const Divider(color: primary, thickness: 4),
               const SizedBox(height: 12),
-
               _grid(
-                count: 9,
-                selected: selectedAvatar,
-                onSelect: (i) => selectedAvatar = i,
+                items: _icons,
+                selectedId: _selectedIconId,
+                onSelect: (id) => _selectedIconId = id,
               ),
-
               const SizedBox(height: 24),
-
               const Text(
                 "Frames",
                 style: TextStyle(
@@ -164,13 +236,11 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
               ),
               const Divider(color: primary, thickness: 4),
               const SizedBox(height: 12),
-
               _grid(
-                count: 9,
-                selected: selectedFrame,
-                onSelect: (i) => selectedFrame = i,
+                items: _frames,
+                selectedId: _selectedFrameId,
+                onSelect: (id) => _selectedFrameId = id,
               ),
-
               const SizedBox(height: 40),
             ],
           ),
