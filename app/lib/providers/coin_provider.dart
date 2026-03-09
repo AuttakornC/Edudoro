@@ -25,6 +25,8 @@ class CoinProvider extends ChangeNotifier {
         final storage = FlutterSecureStorage();
         await storage.delete(key: "jwt_token");
       } else {
+        final storage = FlutterSecureStorage();
+        await storage.delete(key: "jwt_token");
         final msg = body['message'];
         toast("Something went wrong. $msg");
       }
