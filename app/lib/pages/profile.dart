@@ -146,20 +146,20 @@ class _ProfilePageState extends State<ProfilePage> {
                     shape: BoxShape.circle,
                     color: colors.secondary,
                   ),
-                  child: ClipOval(
-                    child: DecorationDisplay(
-                      avatar: _avatar,
-                      frame: _frame,
-                      size: 129,
-                    ),
+                  child: DecorationDisplay(
+                    avatar: _avatar,
+                    frame: _frame,
+                    size: 129,
                   ),
                 ),
 
                 const SizedBox(height: 10),
 
                 InkWell(
-                  onTap: () =>
-                      Navigator.of(context).pushNamed("/avatar_change"),
+                  onTap: () async {
+                    await Navigator.of(context).pushNamed("/avatar_change");
+                    if (mounted) _loadUserInfo();
+                  },
                   child: Text(
                     "Edit",
                     style: TextStyle(
