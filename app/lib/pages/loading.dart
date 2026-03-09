@@ -1,7 +1,9 @@
 import 'package:edudoro/providers/clock_setting_provider.dart';
 import 'package:edudoro/providers/coin_provider.dart';
+import 'package:edudoro/providers/goal_provider.dart';
 import 'package:edudoro/route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 
 class LoadingPage extends StatefulWidget {
@@ -24,10 +26,12 @@ class _LoadingPageState extends State<LoadingPage> {
   Future<void> _startLoading() async {
     final coinProv = context.read<CoinProvider>();
     final clockProv = context.read<ClockSettingProvider>();
+    final goalProv = context.read<GoalProvider>();
 
     final arraySuccess = await Future.wait([
       coinProv.loadCoin(),
       clockProv.loadSettings(),
+      goalProv.loadGoal(),
     ]);
 
     if (arraySuccess.every((element) => element)) {

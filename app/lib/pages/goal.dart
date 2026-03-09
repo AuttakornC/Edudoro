@@ -1,7 +1,10 @@
 import 'package:edudoro/color.dart';
+import 'package:edudoro/providers/goal_provider.dart';
+import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:edudoro/components/ui/button.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class GoalPage extends StatefulWidget {
   const GoalPage({super.key});
@@ -14,6 +17,13 @@ class _GoalPageState extends State<GoalPage> {
   final _goalController = TextEditingController(text: 'Happy');
 
   @override
+  void initState() {
+    super.initState();
+
+    _goalController.text = context.read<GoalProvider>().tmrRound.toString();
+  }
+
+  @override
   void dispose() {
     _goalController.dispose();
     super.dispose();
@@ -23,15 +33,19 @@ class _GoalPageState extends State<GoalPage> {
     final goalText = _goalController.text.trim();
 
     if (goalText.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Please enter a goal.")));
+      toast("Please enter a goal.");
       return;
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text("Saved! Goal: $goalText")));
+    final goalNumber = int.tryParse(goalText);
+
+    if (goalNumber == null) {
+      toast("You must enter the number.");
+      return;
+    }
+
+    toast("Saved! Goal: $goalText");
+    context.read<GoalProvider>().setTomorrowGoal(goalNumber);
   }
 
   @override

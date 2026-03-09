@@ -20,22 +20,39 @@ Future<void> initializeService() async {
 
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
-  bool notiIsGranted = false;
-  int workTime = 0;
-  int restTime = 0;
-  int currentTime = 0;
-  String currentStatus = "work"; // work or rest
-  bool isCancel = false;
-  bool isStarted = false;
-
-  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-  late NotificationDetails platformChannelSpecifics;
+  ClockManager clock = ClockManager();
+  clock.onStateChange = (PomodoroState state) =>
+      service.invoke("state_change", {'value': state.toString()});
+  clock.tickCallback = (int currentTime) =>
+      service.invoke("time_left", {'value': currentTime});
 
   service.on('checkPermission').listen((event) async {
+    clock.noti.checkPermission();
+  });
+
+  service.on("setting").listen((event) {
+    clock.setTime(PomodoroState.work, event?['workTime'] ?? 25 * 60);
+    clock.setTime(PomodoroState.rest, event?['restTime'] ?? 25 * 60);
+  });
+
+  service.on("start").listen((event) async {
+    clock.startAlarm();
+  });
+
+  service.on("stop").listen((event) {
+    clock.stopAlarm();
+  });
+}
+
+class FlutterNoti {
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  late NotificationDetails platformChannelSpecifics;
+  bool isAllow = false;
+
+  Future<void> checkPermission() async {
     try {
       PermissionStatus status = await Permission.notification.status;
       if (status.isPermanentlyDenied) {
-        notiIsGranted = false;
         return;
       }
 
@@ -44,7 +61,7 @@ void onStart(ServiceInstance service) async {
       }
 
       if (status.isGranted) {
-        notiIsGranted = true;
+        isAllow = true;
 
         flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -75,79 +92,93 @@ void onStart(ServiceInstance service) async {
         platformChannelSpecifics = NotificationDetails(
           android: androidPlatformChannelSpecifics,
         );
-      } else {
-        notiIsGranted = false;
       }
     } catch (e) {
-      notiIsGranted = false;
+      isAllow = false;
       print("Setup Noti Fail: $e");
     }
-  });
+  }
 
-  service.on("setting").listen((event) {
-    workTime = event?['workTime'] ?? 25 * 60;
-    restTime = event?['restTime'] ?? 25 * 60;
-    currentTime = workTime;
-    currentStatus = event?['status'] ?? 'work';
-    if (isStarted) isCancel = true;
-    service.invoke("time_left", {'value': workTime});
-  });
+  Future<void> feat(String title, String body) async {
+    if (!isAllow) return;
+    await flutterLocalNotificationsPlugin.show(
+      id: 888,
+      title: title,
+      body: body,
+      notificationDetails: platformChannelSpecifics,
+    );
+  }
 
-  service.on("start").listen((event) async {
-    Timer.periodic(const Duration(seconds: 1), (t) async {
-      if (currentTime <= 0) {
-        if (notiIsGranted) {
-          await flutterLocalNotificationsPlugin.show(
-            id: 888,
-            title: currentStatus == "work" ? "Working" : "Resting",
-            body: "Finished",
-            notificationDetails: platformChannelSpecifics,
-          );
-        }
+  Future<void> clear() async {
+    await flutterLocalNotificationsPlugin.cancelAll();
+  }
+}
 
-        if (currentStatus == "work") {
-          currentTime = restTime;
-          currentStatus = "rest";
-          service.invoke("stateChange", {'value': "rest"});
-        } else {
-          currentTime = workTime;
-          currentStatus = "work";
-          service.invoke("stateChange", {'value': "work"});
-        }
+enum PomodoroState { work, rest }
 
-        service.invoke("time_left", {'value': currentTime});
-        return;
-      }
+class ClockManager {
+  PomodoroState state = PomodoroState.work;
+  int work = 0;
+  int rest = 0;
+  int currentTime = 0;
+  Timer? timer;
+  FlutterNoti noti = FlutterNoti();
+  Function(PomodoroState)? onStateChange;
+  Function(int)? tickCallback;
 
-      if (isCancel) {
-        currentTime = workTime;
-        isCancel = false;
-        isStarted = false;
-        t.cancel();
-        if (notiIsGranted) await flutterLocalNotificationsPlugin.cancelAll();
-        return;
-      }
-
-      if (notiIsGranted) {
-        await flutterLocalNotificationsPlugin.show(
-          id: 888,
-          title: currentStatus == "work" ? "Working" : "Resting",
-          body: "Time left: ${secondToMinuteFormat(currentTime)}",
-          notificationDetails: platformChannelSpecifics,
-        );
-      }
-
-      service.invoke("time_left", {'value': currentTime});
-      currentTime--;
-    });
-  });
-
-  service.on("cancel").listen((event) {
-    isCancel = true;
-    service.invoke("time_left", {'value': workTime});
-    if (currentStatus == "rest") {
-      currentStatus = "work";
-      service.invoke("stateChange", {'value': "work"});
+  void setTime(PomodoroState timer, int time) {
+    if (timer == PomodoroState.work) {
+      work = time;
+    } else {
+      rest = time;
     }
-  });
+    stopAlarm();
+  }
+
+  void startAlarm() {
+    timer = Timer.periodic(const Duration(seconds: 1), (t) async {
+      if (currentTime <= 0) {
+        noti.feat(
+          state == PomodoroState.work ? "Working" : "Resting",
+          "Finished",
+        );
+
+        if (state == PomodoroState.work) {
+          currentTime = rest;
+          state = PomodoroState.rest;
+          changeState(PomodoroState.rest);
+        } else {
+          currentTime = work;
+          state = PomodoroState.work;
+          changeState(PomodoroState.work);
+        }
+
+        tickCallback?.call(currentTime);
+        return;
+      }
+
+      noti.feat(
+        state == PomodoroState.work ? "Working" : "Resting",
+        "Time left: ${secondToMinuteFormat(currentTime)}",
+      );
+
+      currentTime--;
+      tickCallback?.call(currentTime);
+    });
+  }
+
+  void stopAlarm() {
+    if (timer?.isActive ?? false) {
+      timer?.cancel();
+    }
+    noti.clear();
+    currentTime = work;
+    tickCallback?.call(currentTime);
+    changeState(PomodoroState.work);
+  }
+
+  void changeState(PomodoroState inputState) {
+    state = inputState;
+    onStateChange?.call(inputState);
+  }
 }

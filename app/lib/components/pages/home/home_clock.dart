@@ -1,7 +1,9 @@
+import 'package:edudoro/background_service.dart';
 import 'package:edudoro/color.dart';
 import 'package:edudoro/components/ui/button.dart';
 import 'package:edudoro/providers/clock_setting_provider.dart';
 import 'package:edudoro/providers/coin_provider.dart';
+import 'package:edudoro/providers/goal_provider.dart';
 import 'package:edudoro/utils/http.dart';
 import 'package:edudoro/utils/string.dart';
 import 'package:edudoro/utils/toast.dart';
@@ -18,47 +20,43 @@ class HomeClock extends StatefulWidget {
 
 class _HomeClockState extends State<HomeClock>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  bool isTimeRunning = false;
-
-  double workTime = 0;
-  double restTime = 0;
-  String stateStatus = "work";
+  bool _isRunning = false;
 
   @override
   void initState() {
     super.initState();
-    _check();
 
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    );
-
-    FlutterBackgroundService().on("stateChange").listen((event) {
-      if (event != null) {
-        if (stateStatus == "work") {
-          stateStatus = "rest";
-        } else {
-          stateStatus = "work";
-          _increaseCoin();
-        }
+    FlutterBackgroundService().on("state_change").listen((event) async {
+      if (event == null) return;
+      if (event['value'] == null) return;
+      if (event['value'] == PomodoroState.work.toString() && _isRunning) {
+        await _increaseCoin(5);
+        await _decreaseRound();
       }
     });
   }
 
-  Future<void> _increaseCoin() async {
+  Future<void> _decreaseRound() async {
+    final goalProvider = context.read<GoalProvider>();
+
+    if (goalProvider.goalRound == 0) return;
+    if (goalProvider.goalRound == 1) {
+      await _increaseCoin(20);
+    }
+    await goalProvider.decreaseTodayGoal();
+  }
+
+  Future<void> _increaseCoin(int coinNumber) async {
     try {
       final response = await fetch(
         "/score",
         HTTPMethod.post,
-        body: <String, dynamic>{'score': 10},
+        body: <String, dynamic>{'score': coinNumber},
         withAuth: true,
       );
       if (response.statusCode == 201) {
-        if (!context.mounted) return;
         final coinContext = context.read<CoinProvider>();
-        coinContext.increaseCoin(10);
+        coinContext.increaseCoin(coinNumber);
       } else {
         toast("There're some problems to increase coin. Sorry for mistake.");
       }
@@ -68,49 +66,25 @@ class _HomeClockState extends State<HomeClock>
     }
   }
 
-  void _handleStart() async {
-    final service = FlutterBackgroundService();
-
-    service.invoke('start');
-
-    setState(() {
-      isTimeRunning = true;
-    });
+  void _start() {
+    context.read<ClockSettingProvider>().start();
+    _isRunning = true;
   }
 
-  void _check() {
-    final service = FlutterBackgroundService();
-
-    service.invoke("checkPermission");
-  }
-
-  void _setting(double workTime, double restTime, String status) {
-    final service = FlutterBackgroundService();
-
-    this.workTime = workTime * 60;
-    this.restTime = restTime * 60;
-
-    service.invoke("setting", {
-      'workTime': workTime * 60,
-      'restTime': restTime * 60,
-      'status': status,
-    });
-  }
-
-  void _cancel() {
-    final service = FlutterBackgroundService();
-    service.invoke("cancel");
-
-    setState(() {
-      isTimeRunning = false;
-    });
+  void _stop() {
+    context.read<ClockSettingProvider>().stop();
+    _isRunning = false;
   }
 
   @override
   Widget build(BuildContext context) {
-    var settings = context.watch<ClockSettingProvider>();
+    final currentTime = context.select<ClockSettingProvider, int>(
+      (models) => models.currentTime,
+    );
 
-    _setting(settings.workTime, settings.restTime, 'work');
+    final isRunning = context.select<ClockSettingProvider, bool>(
+      (models) => models.isRunning,
+    );
 
     return Padding(
       padding: const EdgeInsets.all(48.0),
@@ -119,66 +93,21 @@ class _HomeClockState extends State<HomeClock>
           Stack(
             alignment: Alignment.center,
             children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: StreamBuilder(
-                  stream: FlutterBackgroundService().on("time_left"),
-                  builder: (context, snapshot) {
-                    final snapData = snapshot.data;
-                    int currentSecond = 0;
-                    if (snapData != null) {
-                      currentSecond = snapData['value'];
-                    }
-                    double fullSecond = stateStatus == "work"
-                        ? workTime
-                        : restTime;
-
-                    if (fullSecond == 0) {
-                      fullSecond = 1;
-                    }
-
-                    _animationController.animateTo(
-                      currentSecond / fullSecond,
-                      duration: const Duration(seconds: 1),
-                    );
-
-                    return AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (context, child) {
-                        return CircularProgressIndicator(
-                          value: _animationController.value,
-                          strokeWidth: 16,
-                          backgroundColor: white,
-                        );
-                      },
-                    );
-                  },
+              AspectRatio(aspectRatio: 1, child: ProgressBar()),
+              Text(
+                secondToMinuteFormat(currentTime),
+                style: const TextStyle(
+                  fontSize: 64,
+                  fontWeight: FontWeight.bold,
+                  color: primary,
                 ),
-              ),
-              StreamBuilder(
-                stream: FlutterBackgroundService().on("time_left"),
-                builder: (context, snapshot) {
-                  const textStyle = TextStyle(
-                    fontSize: 64,
-                    fontWeight: FontWeight.bold,
-                    color: primary,
-                  );
-
-                  if (!snapshot.hasData) {
-                    return const Text("Ready", style: textStyle);
-                  }
-
-                  final timeLeft = snapshot.data!['value'];
-
-                  return Text(secondToMinuteFormat(timeLeft), style: textStyle);
-                },
               ),
             ],
           ),
           SizedBox(height: 32),
           Button(
-            label: isTimeRunning ? "GIVE UP" : "START",
-            onPressed: isTimeRunning ? _cancel : _handleStart,
+            label: !isRunning ? "START" : "GIVE UP",
+            onPressed: !isRunning ? _start : _stop,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24),
             ),
@@ -189,6 +118,60 @@ class _HomeClockState extends State<HomeClock>
           ),
         ],
       ),
+    );
+  }
+}
+
+class ProgressBar extends StatefulWidget {
+  const ProgressBar({super.key});
+
+  @override
+  State<ProgressBar> createState() => _ProgressBarState();
+}
+
+class _ProgressBarState extends State<ProgressBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final clockProvider = context.watch<ClockSettingProvider>();
+    final currentSecond = clockProvider.currentTime;
+    late double fullSecond;
+    if (clockProvider.currentState == PomodoroState.work) {
+      fullSecond = clockProvider.workTime;
+    } else {
+      fullSecond = clockProvider.restTime;
+    }
+
+    if (fullSecond == 0) {
+      fullSecond = 1;
+    }
+
+    _animationController.animateTo(
+      currentSecond / fullSecond,
+      duration: const Duration(seconds: 1),
+    );
+
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return CircularProgressIndicator(
+          value: _animationController.value,
+          strokeWidth: 16,
+          backgroundColor: white,
+        );
+      },
     );
   }
 }

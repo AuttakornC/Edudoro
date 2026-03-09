@@ -2,7 +2,9 @@ import 'package:edudoro/color.dart';
 import 'package:edudoro/components/pages/home/home_clock.dart';
 import 'package:edudoro/components/pages/home/home_coin.dart';
 import 'package:edudoro/components/util/svgIcon.dart';
+import 'package:edudoro/providers/goal_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -17,47 +19,7 @@ class HomePage extends StatelessWidget {
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(124, 130, 0, 0),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: const Text(
-                      "Goal: Finished 1 Round",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  TextButton(
-                    onPressed: () => {Navigator.of(context).pushNamed("/goal")},
-
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text(
-                      "New Goal For Tomorrow +",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: white,
-                        decoration: TextDecoration.underline,
-                        decorationColor: white,
-                      ),
-                    ),
-                  ),
-                  HomeClock(),
-                ],
+                children: [HomeGoalButton(), HomeClock()],
               ),
             ),
             HomeFooter(),
@@ -120,6 +82,61 @@ class HomeFooter extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class HomeGoalButton extends StatefulWidget {
+  const HomeGoalButton({super.key});
+
+  @override
+  State<HomeGoalButton> createState() => _HomeGoalButtonState();
+}
+
+class _HomeGoalButtonState extends State<HomeGoalButton> {
+  @override
+  Widget build(BuildContext context) {
+    final goalRound = context.select<GoalProvider, int>(
+      (value) => value.goalRound,
+    );
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(124, 130, 0, 0),
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: Text(
+            "Goal: Finished $goalRound Round",
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: white,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextButton(
+          onPressed: () => {Navigator.of(context).pushNamed("/goal")},
+
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: const Text(
+            "New Goal For Tomorrow +",
+            style: TextStyle(
+              fontSize: 14,
+              color: white,
+              decoration: TextDecoration.underline,
+              decorationColor: white,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

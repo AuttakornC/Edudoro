@@ -1,3 +1,4 @@
+import 'package:edudoro/background_service.dart';
 import 'package:edudoro/color.dart';
 import 'package:edudoro/components/ui/button.dart';
 import 'package:edudoro/providers/clock_setting_provider.dart';
@@ -22,13 +23,10 @@ class _SettingPageState extends State<SettingPage> {
   void initState() {
     super.initState();
 
-    _workController.text = context
-        .read<ClockSettingProvider>()
-        .workTime
+    _workController.text = (context.read<ClockSettingProvider>().workTime / 60)
         .toString();
-    _breakController.text = context
-        .read<ClockSettingProvider>()
-        .restTime
+
+    _breakController.text = (context.read<ClockSettingProvider>().restTime / 60)
         .toString();
   }
 
@@ -54,8 +52,14 @@ class _SettingPageState extends State<SettingPage> {
     final service = FlutterBackgroundService();
 
     service.invoke("cancel");
-    context.read<ClockSettingProvider>().updateWorkTime(workTime);
-    context.read<ClockSettingProvider>().updateRestTime(breakTime);
+    context.read<ClockSettingProvider>().updateTime(
+      PomodoroState.work,
+      workTime * 60,
+    );
+    context.read<ClockSettingProvider>().updateTime(
+      PomodoroState.rest,
+      breakTime * 60,
+    );
     toast("Saved! Work: ${workTime}m  Break: ${breakTime}m");
     Navigator.of(context).pushReplacementNamed('/home');
   }
