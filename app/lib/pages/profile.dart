@@ -17,12 +17,13 @@
  */
 
 import 'package:edudoro/color.dart';
+import 'package:edudoro/components/ui/decoration_display.dart';
+import 'package:edudoro/types/decorations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:edudoro/utils/http.dart';
 import 'package:edudoro/utils/toast.dart';
-import '../components/util/svgIcon.dart';
 
 /// The [ProfilePage] displays the current user's avatar, username, and email.
 ///
@@ -46,6 +47,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// The authenticated user's email address.
   String _email = '';
+
+  /// Currently equipped avatar decoration.
+  Decorations? _avatar;
+
+  /// Currently equipped frame decoration.
+  Decorations? _frame;
 
   /// Whether the profile data is currently being fetched.
   bool _isLoading = false;
@@ -71,9 +78,20 @@ class _ProfilePageState extends State<ProfilePage> {
       final body = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final data = body['data'] as Map<String, dynamic>;
+        final decorations = (data['decorations'] as List<dynamic>? ?? []);
         setState(() {
           _username = data['username'] as String? ?? '';
           _email = data['email'] as String? ?? '';
+          _avatar = decorations
+              .cast<Map<String, dynamic>>()
+              .where((d) => d['type'] == 'icon')
+              .map((d) => Decorations(type: DecorationType.icon, detail: d['detail'] as String))
+              .firstOrNull;
+          _frame = decorations
+              .cast<Map<String, dynamic>>()
+              .where((d) => d['type'] == 'frame')
+              .map((d) => Decorations(type: DecorationType.frame, detail: d['detail'] as String))
+              .firstOrNull;
         });
       }
     } catch (e) {
@@ -128,11 +146,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     shape: BoxShape.circle,
                     color: colors.secondary,
                   ),
-                  child: Center(
-                    child: SVGIcon(
-                      src: "assets/icons/ProfileIcon.svg",
-                      width: 60,
-                      height: 60,
+                  child: ClipOval(
+                    child: DecorationDisplay(
+                      avatar: _avatar,
+                      frame: _frame,
+                      size: 129,
                     ),
                   ),
                 ),
