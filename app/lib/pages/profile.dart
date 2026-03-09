@@ -1,19 +1,97 @@
+/*
+ * File: profile_page.dart
+ * Description: UI screen for displaying the authenticated user's profile,
+ * including avatar, username, and email fetched from the backend API.
+ *
+ * Dependencies:
+ * - flutter_secure_storage (JWT token management)
+ * - edudoro/utils/http.dart (network requests)
+ *
+ * Lifecycle:
+ * - Created via Navigator
+ * - Fetches user data on init
+ * - Disposed when user navigates away
+ *
+ * Author: Phatcharat Praipanasampan
+ * Course: Mobile Application Development Framework
+ */
+
 import 'package:edudoro/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'dart:convert';
+import 'package:edudoro/utils/http.dart';
+import 'package:edudoro/utils/toast.dart';
 import '../components/util/svgIcon.dart';
 
-class ProfilePage extends StatelessWidget {
+/// The [ProfilePage] displays the current user's avatar, username, and email.
+///
+/// Fields:
+/// - username: display name of the authenticated user
+/// - email: email address of the authenticated user
+///
+/// Usage:
+/// - Navigated to from the main bottom navigation bar
+/// - Supports logout which clears JWT token and redirects to sign-in
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  /// The authenticated user's display name.
+  String _username = '';
+
+  /// The authenticated user's email address.
+  String _email = '';
+
+  /// Whether the profile data is currently being fetched.
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_loadUserInfo);
+  }
+
+  /// Fetches the current user's username and email from [GET /api/v1/profile].
+  ///
+  /// This method performs a network request and may take time to complete.
+  /// Shows a toast message if the request fails or the server returns an error.
+  Future<void> _loadUserInfo() async {
+    setState(() => _isLoading = true);
+    try {
+      final response = await fetch(
+        "/profile",
+        HTTPMethod.get,
+        withAuth: true,
+      );
+      final body = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final data = body['data'] as Map<String, dynamic>;
+        setState(() {
+          _username = data['username'] as String? ?? '';
+          _email = data['email'] as String? ?? '';
+        });
+      }
+    } catch (e) {
+      toast("Something went wrong. $e");
+    }
+    setState(() => _isLoading = false);
+  }
+
+  /// Logs the user out and clears all local session data.
+  ///
+  /// Side effects:
+  /// - Removes JWT token from secure storage
+  /// - Navigates to sign-in page
   Future<void> _logout(BuildContext context) async {
     const storage = FlutterSecureStorage();
     await storage.delete(key: 'jwt_token');
     if (context.mounted) {
-      Navigator.of(
-        context,
-      ).pushNamedAndRemoveUntil('/sign_in', (route) => false);
+      Navigator.of(context).pushReplacementNamed('/sign_in');
     }
   }
 
@@ -40,7 +118,6 @@ class ProfilePage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Center(
             child: Column(
-              // mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 60),
 
@@ -80,8 +157,10 @@ class ProfilePage extends StatelessWidget {
 
                 const SizedBox(height: 15),
 
-                Text(
-                  "Username",
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : Text(
+                  _username.isEmpty ? '-' : _username,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -92,7 +171,7 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 5),
 
                 Text(
-                  "example@example.com",
+                  _email.isEmpty ? '-' : _email,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
