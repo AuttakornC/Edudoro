@@ -17,6 +17,8 @@ import 'package:edudoro/color.dart';
 
 import 'decoration_display.dart';
 
+import '../util/color_hex_converter.dart';
+
 /// The `FriendListTile` widget represents a single friend item in the friend list.
 /// It displays the friend's username, score, and provides an option to unfriend the user.
 ///
@@ -55,6 +57,9 @@ class FriendListTile extends StatelessWidget {
   /// The frame decoration of the friend. Optional.
   final Decorations? frame;
 
+  /// The color of the username text. Optional.
+  final Decorations? usernameColor;
+
   const FriendListTile({
     super.key,
     required this.username,
@@ -63,6 +68,7 @@ class FriendListTile extends StatelessWidget {
     required this.onUnfriend,
     this.avatar,
     this.frame,
+    this.usernameColor,
   });
 
   @override
@@ -98,9 +104,11 @@ class FriendListTile extends StatelessWidget {
               child: Center(
                 child: Text(
                   username.isNotEmpty ? username[0].toUpperCase() : "?",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: primary,
+                    color: usernameColor != null
+                        ? hexToColor(usernameColor!.detail)
+                        : primary,
                   ),
                 ),
               ),

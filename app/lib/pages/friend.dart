@@ -367,6 +367,9 @@ class FriendList extends StatelessWidget {
               frame: friends[index].decorations
                   ?.where((d) => d.type == DecorationType.frame)
                   .firstOrNull,
+              usernameColor: friends[index].decorations
+                  ?.where((d) => d.type == DecorationType.name_color)
+                  .firstOrNull,
               onUnfriend: () async {
                 final bool confirmed =
                     await showConfirmDialog(
@@ -539,6 +542,9 @@ class FriendRequestList extends StatelessWidget {
                   .firstOrNull,
               frame: friendRequests[index].decorations
                   ?.where((d) => d.type == DecorationType.frame)
+                  .firstOrNull,
+              usernameColor: friendRequests[index].decorations
+                  ?.where((d) => d.type == DecorationType.name_color)
                   .firstOrNull,
               onAccept: () {
                 toast("Accepting friend request...");

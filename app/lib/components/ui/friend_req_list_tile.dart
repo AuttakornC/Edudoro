@@ -18,6 +18,8 @@ import 'package:edudoro/color.dart';
 
 import 'decoration_display.dart';
 
+import '../util/color_hex_converter.dart';
+
 /// The `FriendRequestListTile` widget represents a single friend request item in the friend request list.
 /// It displays the requester's username, the time of the request,
 /// and provides options to accept or reject the friend request.
@@ -55,6 +57,9 @@ class FriendRequestListTile extends StatelessWidget {
   /// The frame decoration of the requester. Optional.
   final Decorations? frame;
 
+  /// The color of the username text. Optional.
+  final Decorations? usernameColor;
+
   const FriendRequestListTile({
     super.key,
     required this.username,
@@ -63,6 +68,7 @@ class FriendRequestListTile extends StatelessWidget {
     required this.onReject,
     this.avatar,
     this.frame,
+    this.usernameColor,
   });
 
   @override
@@ -113,9 +119,11 @@ class FriendRequestListTile extends StatelessWidget {
               children: [
                 Text(
                   username,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: primary,
+                    color: usernameColor != null
+                        ? hexToColor(usernameColor!.detail)
+                        : primary,
                   ),
                 ),
                 // Text("Requested at\n$time"),
