@@ -113,7 +113,7 @@ func ProfileUseDecocation(c *gin.Context) {
 
 		query := tx.Model(&models.BoughtDecoration{})
 
-		result := query.Where("account_id = ?", accountId).Where("type = ?", decoration.Type).Update("used", false)
+		result := query.Where("account_id = ?", accountId).Where("decoration_id IN (?)", tx.Model(&models.Decoration{}).Select("decoration_id").Where("type = ?", decoration.Type)).Update("used", false)
 		if result.Error != nil {
 			return result.Error
 		}

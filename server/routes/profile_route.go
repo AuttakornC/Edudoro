@@ -12,5 +12,5 @@ func profileRouteSetup(r *gin.RouterGroup) {
 	profileRoute.Use(middlewares.AuthMiddleware())
 	profileRoute.GET("", controllers.ProfileGetCurrentUsingDecorations)
 	profileRoute.GET("/decorations", controllers.ProfileGetAllDecorations)
-	profileRoute.PATCH("/use/:decoration_id", controllers.ProfileUseDecocation)
+	profileRoute.PATCH("/use", controllers.ProfileUseDecocation)
 }
