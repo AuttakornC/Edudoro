@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:edudoro/utils/string.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -47,6 +48,7 @@ void onStart(ServiceInstance service) async {
 class FlutterNoti {
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   late NotificationDetails platformChannelSpecifics;
+  AudioPlayer player = AudioPlayer();
   bool isAllow = false;
 
   Future<void> checkPermission() async {
@@ -112,6 +114,23 @@ class FlutterNoti {
   Future<void> clear() async {
     await flutterLocalNotificationsPlugin.cancelAll();
   }
+
+  Future<void> soundAndVibrate() async {
+    await player.setAudioContext(
+      AudioContext(
+        iOS: AudioContextIOS(category: AVAudioSessionCategory.ambient),
+        android: AudioContextAndroid(usageType: AndroidUsageType.notification),
+      ),
+    );
+
+    await player.play(AssetSource('noti.mp3'));
+
+    Future.delayed(Duration(seconds: 1), () {
+      if (player.state == PlayerState.playing) {
+        player.stop();
+      }
+    });
+  }
 }
 
 enum PomodoroState { work, rest }
@@ -142,6 +161,8 @@ class ClockManager {
           state == PomodoroState.work ? "Working" : "Resting",
           "Finished",
         );
+
+        noti.soundAndVibrate();
 
         if (state == PomodoroState.work) {
           currentTime = rest;

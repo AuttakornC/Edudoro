@@ -42,6 +42,7 @@ dependencies:
   flutter_background_service: ^5.1.0
   flutter_local_notifications: ^20.1.0
   permission_handler: ^12.0.1
+  audioplayers: ^6.6.0
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +70,7 @@ flutter:
     - assets/icons/
     - assets/frames/
     - assets/avatars/
+    - assets/noti.mp3
 
   # To add assets to your application, add an assets section, like this:
   # assets:
