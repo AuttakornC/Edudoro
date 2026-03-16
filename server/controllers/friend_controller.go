@@ -40,8 +40,8 @@ func FriendAcceptedQuery(c *gin.Context) {
 		Preload("FriendsFromAcception", "accepted_at IS NOT NULL").
 		Preload("FriendsFromAcception.Requester").
 		Preload("FriendsFromAcception.Requester.Scores", "created_at >= ?", today).
-		Preload("FriendsFromRequest.Requester.Decorations", "used = ?", true).
-		Preload("FriendsFromRequest.Requester.Decorations.Decoration").
+		Preload("FriendsFromAcception.Requester.Decorations", "used = ?", true).
+		Preload("FriendsFromAcception.Requester.Decorations.Decoration").
 		First(&account, "account_id = ?", accountId).Error
 
 	if err != nil {
@@ -66,7 +66,9 @@ func FriendAcceptedQuery(c *gin.Context) {
 	for _, friend := range account.FriendsFromAcception {
 		var friendTodayScore int = 0
 		for _, scoreHistory := range friend.Requester.Scores {
-			friendTodayScore += scoreHistory.Score
+			if scoreHistory.Score > 0 {
+				friendTodayScore += scoreHistory.Score
+			}
 		}
 		decorations := []friendDecoration{}
 		for _, decoration := range friend.Requester.Decorations {
