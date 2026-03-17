@@ -1,12 +1,21 @@
-import 'dart:convert';
+/// File: sign_up.dart
+///
+/// Description: Provides the sign-up screen and registration logic for Edudoro.
+///
+/// Responsibilities:
+/// - Handles user registration and input validation.
+/// - Displays error messages and navigates to sign-in screen.
+/// - Manages loading state and form controls.
+///
+/// Author: Auttakorn Camsoi
+/// Course: Mobile Application Development Framework
 
 import 'package:edudoro/components/ui/button.dart';
-import 'package:edudoro/config.dart';
 import 'package:edudoro/utils/http.dart';
 import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 
+/// The sign-up screen widget for Edudoro.
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
 
@@ -37,6 +46,7 @@ class SignUpPage extends StatelessWidget {
   }
 }
 
+/// Form widget for handling user registration and validation.
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
 
@@ -61,6 +71,9 @@ class _SignUpForm extends State<SignUpForm> {
     super.dispose();
   }
 
+  /// Attempts to sign up with [username], [email], and [password].
+  ///
+  /// Side effects: Shows toast messages, navigates to sign-in page, and handles registration failure modes.
   Future<void> _signUp(
     BuildContext context,
     String username,
@@ -92,6 +105,7 @@ class _SignUpForm extends State<SignUpForm> {
     }
   }
 
+  /// Sets loading state for the form.
   void _loadingSet(bool status) {
     setState(() {
       _isLoading = status;
@@ -100,6 +114,7 @@ class _SignUpForm extends State<SignUpForm> {
 
   @override
   Widget build(BuildContext context) {
+    /// Handles form submission and input validation.
     void onSubmit() async {
       String username = _usernameController.text;
       String email = _emailController.text;
@@ -192,6 +207,8 @@ class _SignUpForm extends State<SignUpForm> {
             ),
           ),
           SizedBox(height: 20),
+
+          /// Button to submit sign-up form.
           Button(label: "Sign Up", onPressed: _isLoading ? () => {} : onSubmit),
           SizedBox(height: 20),
           Row(
@@ -205,6 +222,8 @@ class _SignUpForm extends State<SignUpForm> {
                 ),
               ),
               SizedBox(width: 6),
+
+              /// Link to navigate to sign-in page.
               GestureDetector(
                 onTap: () => {Navigator.of(context).pushNamed("/sign_in")},
                 child: Text(

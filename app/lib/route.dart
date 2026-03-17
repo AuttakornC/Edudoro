@@ -1,3 +1,15 @@
+/// File: route.dart
+///
+/// Description: Defines global navigation routes and navigation utilities for the Edudoro application.
+///
+/// Responsibilities:
+/// - Maps route names to page widgets for navigation.
+/// - Provides a global [NavigatorState] key for navigation control.
+/// - Offers utility methods for programmatic navigation.
+///
+/// Author: Auttakorn Camsoi
+/// Course: Mobile Application Development Framework
+
 import 'package:edudoro/pages/avatar_change.dart';
 import 'package:edudoro/pages/friend.dart';
 import 'package:edudoro/pages/goal.dart';
@@ -12,6 +24,7 @@ import 'package:edudoro/pages/sign_up.dart';
 import 'package:edudoro/theme.dart';
 import 'package:flutter/material.dart';
 
+/// The main application widget that sets up navigation and theming.
 class RouteApp extends StatelessWidget {
   const RouteApp({super.key});
 
@@ -21,6 +34,8 @@ class RouteApp extends StatelessWidget {
       title: 'Edudoro',
       theme: theme,
       navigatorKey: Nav.key,
+
+      /// Maps route names to their corresponding page widgets.
       routes: {
         "/": (context) => const LandingPage(),
         "/loading": (context) => const LoadingPage(),
@@ -38,9 +53,15 @@ class RouteApp extends StatelessWidget {
   }
 }
 
+/// Provides global navigation utilities and a [NavigatorState] key.
 class Nav {
   static final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
 
+  /// Navigates to the route named [routeName].
+  ///
+  /// If [removeAll] is true, removes all previous routes from the stack.
+  ///
+  /// Side effects: Changes the current page in the app.
   static void goTo(String routeName, {bool? removeAll}) {
     if (removeAll != null && removeAll) {
       key.currentState?.pushNamedAndRemoveUntil(routeName, (route) => false);

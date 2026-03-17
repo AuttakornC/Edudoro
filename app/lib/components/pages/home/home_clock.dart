@@ -1,3 +1,15 @@
+/// File: home_clock.dart
+///
+/// Description: Displays the Pomodoro timer and handles timer state, coin rewards, and goal progress in the home screen.
+///
+/// Responsibilities:
+/// - Shows timer progress and controls.
+/// - Updates coin and goal state based on timer events.
+/// - Handles async network requests and state changes.
+///
+/// Author: Auttakorn Camsoi
+/// Course: Mobile Application Development Framework
+
 import 'package:edudoro/background_service.dart';
 import 'package:edudoro/color.dart';
 import 'package:edudoro/components/ui/button.dart';
@@ -11,6 +23,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:provider/provider.dart';
 
+/// Widget displaying the Pomodoro timer and controls.
+///
+/// Created via Navigator from the home screen.
 class HomeClock extends StatefulWidget {
   const HomeClock({super.key});
 
@@ -26,6 +41,7 @@ class _HomeClockState extends State<HomeClock>
   void initState() {
     super.initState();
 
+    /// Listens for timer state changes and updates coin/goal.
     FlutterBackgroundService().on("state_change").listen((event) async {
       if (event == null) return;
       if (event['value'] == null) return;
@@ -36,6 +52,9 @@ class _HomeClockState extends State<HomeClock>
     });
   }
 
+  /// Decreases today's goal round and increases coin if last round.
+  ///
+  /// Side effects: Updates goal provider and coin provider.
   Future<void> _decreaseRound() async {
     final goalProvider = context.read<GoalProvider>();
 
@@ -46,6 +65,10 @@ class _HomeClockState extends State<HomeClock>
     await goalProvider.decreaseTodayGoal();
   }
 
+  /// Increases the user's coin balance by [coinNumber].
+  ///
+  /// Side effects: Updates coin provider and shows toast on failure.
+  /// Waits for async network request to complete.
   Future<void> _increaseCoin(int coinNumber) async {
     try {
       final response = await fetch(
@@ -66,11 +89,17 @@ class _HomeClockState extends State<HomeClock>
     }
   }
 
+  /// Starts the timer and updates running state.
+  ///
+  /// Side effects: Notifies [ClockSettingProvider] and updates UI.
   void _start() {
     context.read<ClockSettingProvider>().start();
     _isRunning = true;
   }
 
+  /// Stops the timer and updates running state.
+  ///
+  /// Side effects: Notifies [ClockSettingProvider] and updates UI.
   void _stop() {
     context.read<ClockSettingProvider>().stop();
     _isRunning = false;
@@ -122,6 +151,7 @@ class _HomeClockState extends State<HomeClock>
   }
 }
 
+/// Animated progress bar for the Pomodoro timer.
 class ProgressBar extends StatefulWidget {
   const ProgressBar({super.key});
 

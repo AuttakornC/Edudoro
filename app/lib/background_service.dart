@@ -1,3 +1,16 @@
+/// File: background_service.dart
+///
+/// Description: Manages background services, notifications, and Pomodoro timer logic for Edudoro.
+///
+/// Responsibilities:
+/// - Initializes and configures background services.
+/// - Handles notification permissions and delivery.
+/// - Manages Pomodoro timer state and transitions.
+/// - Provides audio and vibration feedback.
+///
+/// Author: Auttakorn Camsoi
+/// Course: Mobile Application Development Framework
+
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -6,6 +19,9 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+/// Initializes the background service for the application.
+///
+/// Side effects: Configures background execution, notification channels, and event listeners.
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
 
@@ -19,6 +35,11 @@ Future<void> initializeService() async {
   );
 }
 
+/// Entry point for background service execution.
+///
+/// Registers event listeners for timer state, permission checks, and alarm control.
+///
+/// Side effects: Invokes service events, updates timer state, and manages notifications.
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   ClockManager clock = ClockManager();
@@ -51,6 +72,11 @@ class FlutterNoti {
   AudioPlayer player = AudioPlayer();
   bool isAllow = false;
 
+  /// Checks and requests notification permissions from the user.
+  ///
+  /// Side effects: May prompt the user for permissions and update [isAllow].
+  ///
+  /// Throws [PlatformException] if permission request fails.
   Future<void> checkPermission() async {
     try {
       PermissionStatus status = await Permission.notification.status;
@@ -101,6 +127,11 @@ class FlutterNoti {
     }
   }
 
+  /// Displays a notification with the given [title] and [body].
+  ///
+  /// Side effects: Shows a local notification to the user.
+  ///
+  /// Throws [PlatformException] if notification fails.
   Future<void> feat(String title, String body) async {
     if (!isAllow) return;
     await flutterLocalNotificationsPlugin.show(
@@ -111,10 +142,16 @@ class FlutterNoti {
     );
   }
 
+  /// Clears all delivered notifications.
+  ///
+  /// Side effects: Removes all notifications from the notification tray.
   Future<void> clear() async {
     await flutterLocalNotificationsPlugin.cancelAll();
   }
 
+  /// Plays a notification sound and triggers device vibration.
+  ///
+  /// Side effects: Plays audio and vibrates the device.
   Future<void> soundAndVibrate() async {
     await player.setAudioContext(
       AudioContext(
@@ -133,8 +170,10 @@ class FlutterNoti {
   }
 }
 
+/// Represents the Pomodoro timer state.
 enum PomodoroState { work, rest }
 
+/// Manages Pomodoro timer logic, state transitions, and notification integration.
 class ClockManager {
   PomodoroState state = PomodoroState.work;
   int work = 0;
@@ -145,6 +184,9 @@ class ClockManager {
   Function(PomodoroState)? onStateChange;
   Function(int)? tickCallback;
 
+  /// Sets the timer duration for the given [timer] state.
+  ///
+  /// Side effects: Updates internal timer values and resets alarm.
   void setTime(PomodoroState timer, int time) {
     if (timer == PomodoroState.work) {
       work = time;
@@ -154,6 +196,9 @@ class ClockManager {
     stopAlarm();
   }
 
+  /// Starts the Pomodoro timer and handles state transitions.
+  ///
+  /// Side effects: Notifies listeners, triggers notifications, and manages timer lifecycle.
   void startAlarm() {
     timer = Timer.periodic(const Duration(seconds: 1), (t) async {
       if (currentTime <= 0) {
@@ -188,6 +233,9 @@ class ClockManager {
     });
   }
 
+  /// Stops the Pomodoro timer and resets state.
+  ///
+  /// Side effects: Cancels the timer, clears notifications, and resets timer values.
   void stopAlarm() {
     if (timer?.isActive ?? false) {
       timer?.cancel();
@@ -198,6 +246,9 @@ class ClockManager {
     changeState(PomodoroState.work);
   }
 
+  /// Changes the current Pomodoro state to [inputState].
+  ///
+  /// Side effects: Updates state and notifies listeners.
   void changeState(PomodoroState inputState) {
     state = inputState;
     onStateChange?.call(inputState);

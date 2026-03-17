@@ -1,14 +1,35 @@
+/// File: goal_provider.dart
+///
+/// Description: Manages daily and tomorrow goal rounds for Edudoro, including persistence and state changes.
+///
+/// Responsibilities:
+/// - Loads and updates goal rounds from secure storage.
+/// - Handles logic for daily and tomorrow goals.
+/// - Notifies listeners of state changes.
+///
+/// Author: Auttakorn Camsoi
+/// Course: Mobile Application Development Framework
+
 import 'package:edudoro/utils/string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+/// Provider for managing daily and tomorrow goal rounds.
+///
+/// Separates goal logic from UI and handles persistence.
 class GoalProvider extends ChangeNotifier {
   int _goalRound = 0;
   int _tmrRound = 0;
 
+  /// The number of goal rounds for today.
   int get goalRound => _goalRound;
+
+  /// The number of goal rounds for tomorrow.
   int get tmrRound => _tmrRound;
 
+  /// Loads goal rounds from secure storage and updates state.
+  ///
+  /// Side effects: Updates goal state, persists changes, and notifies listeners.
   Future<bool> loadGoal() async {
     final storage = FlutterSecureStorage();
 
@@ -55,6 +76,9 @@ class GoalProvider extends ChangeNotifier {
     return true;
   }
 
+  /// Sets the goal round for tomorrow and persists to storage.
+  ///
+  /// Side effects: Updates tomorrow goal state and notifies listeners.
   Future<void> setTomorrowGoal(int inputRound) async {
     final storage = FlutterSecureStorage();
     final tmr = DateTime.now().add(Duration(days: 1));
@@ -64,6 +88,9 @@ class GoalProvider extends ChangeNotifier {
     await storage.write(key: "tmr_goal", value: tmrInfo.toString());
   }
 
+  /// Decreases today's goal round and persists to storage.
+  ///
+  /// Side effects: Updates today goal state and notifies listeners.
   Future<void> decreaseTodayGoal() async {
     final storage = FlutterSecureStorage();
     final now = DateTime.now();
@@ -77,12 +104,14 @@ class GoalProvider extends ChangeNotifier {
   }
 }
 
+/// Stores goal round and date information for persistence.
 class GoalStorageInfo {
   int round;
   String date;
 
   GoalStorageInfo({required this.round, required this.date});
 
+  /// Parses a string into a [GoalStorageInfo] object.
   static GoalStorageInfo parse(String input) {
     List<String> splitedInput = input.split("_");
     if (splitedInput.length != 2) {
@@ -98,11 +127,13 @@ class GoalStorageInfo {
     return GoalStorageInfo(round: round, date: splitedInput[0]);
   }
 
+  /// Returns a string representation for storage.
   @override
   String toString() {
     return "${date}_$round";
   }
 
+  /// Sets the [round] and [date] values.
   void set(int _round, String _date) {
     round = _round;
     date = _date;
