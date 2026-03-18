@@ -1,3 +1,25 @@
+/*
+File: goal.dart
+Description: UI page for viewing and updating the user's goal for tomorrow. It initializes the input field from provider state, validates user input, and persists the value through state management.
+Responsibilities:
+- Render the goal input interface.
+- Validate numeric goal input before saving.
+- Persist the goal using provider state and show user feedback.
+Dependencies:
+- flutter/material.dart
+- flutter/services.dart
+- provider
+- edudoro/providers/goal_provider.dart
+- edudoro/components/ui/button.dart
+- edudoro/utils/toast.dart
+- edudoro/color.dart
+Lifecycle:
+- Initializes the text controller value from provider state in initState.
+- Disposes the controller in dispose to prevent memory leaks.
+Author: Chanakarn Palipol
+Course: Mobile Application Development Framework
+*/
+
 import 'package:edudoro/color.dart';
 import 'package:edudoro/providers/goal_provider.dart';
 import 'package:edudoro/utils/toast.dart';
@@ -6,7 +28,16 @@ import 'package:edudoro/components/ui/button.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+/// Represents the goal configuration page for setting tomorrow's target value.
+///
+/// Fields:
+/// - [key]: Optional widget key used by the Flutter framework.
+///
+/// Usage:
+/// - Pushed from app navigation when the user wants to update tomorrow's goal.
+/// - Works with [GoalProvider] to load and save persisted goal data.
 class GoalPage extends StatefulWidget {
+  /// Creates a [GoalPage].
   const GoalPage({super.key});
 
   @override

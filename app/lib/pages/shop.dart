@@ -1,5 +1,28 @@
-import 'dart:convert';
+/*
+File: shop.dart
+Description: UI page that displays purchasable decorations and handles item purchases using authenticated API calls. It loads categorized shop items, confirms purchase intent, and updates local ownership state and coin balance.
+Responsibilities:
+- Fetch and render decoration items by category.
+- Trigger purchase requests and map API responses to UI outcomes.
+- Synchronize successful purchases with local ownership and coin state.
+Dependencies:
+- flutter/material.dart
+- provider
+- dart:convert
+- edudoro/providers/coin_provider.dart
+- edudoro/components/ui/confirm_dialog.dart
+- edudoro/components/util/svgIcon.dart
+- edudoro/utils/http.dart
+- edudoro/utils/toast.dart
+- edudoro/color.dart
+Lifecycle:
+- Starts data loading in initState via asynchronous fetch.
+- Rebuilds UI based on loading state and provider-driven coin updates.
+Author: Chanakarn Palipol
+Course: Mobile Application Development Framework
+*/
 
+import 'dart:convert';
 import 'package:edudoro/color.dart';
 import 'package:edudoro/components/ui/confirm_dialog.dart';
 import 'package:edudoro/components/util/svgIcon.dart';
@@ -25,14 +48,24 @@ class _ShopItem {
   });
 
   factory _ShopItem.fromJson(Map<String, dynamic> json) => _ShopItem(
-        decorationId: json['decoration_id'] as String,
-        detail: json['detail'] as String,
-        price: json['price'] as int,
-        owned: json['owned'] as bool,
-      );
+    decorationId: json['decoration_id'] as String,
+    detail: json['detail'] as String,
+    price: json['price'] as int,
+    owned: json['owned'] as bool,
+  );
 }
 
+/// Represents the shop page where users can buy avatar, frame, and name-color
+/// decorations.
+///
+/// Fields:
+/// - [key]: Optional widget key used by the Flutter framework.
+///
+/// Usage:
+/// - Opened from app navigation to browse available cosmetic items.
+/// - Interacts with backend shop APIs and updates [CoinProvider] on success.
 class ShopPage extends StatefulWidget {
+  /// Creates a [ShopPage].
   const ShopPage({super.key});
 
   @override
@@ -185,13 +218,21 @@ class _ShopPageState extends State<ShopPage> {
                         if (_icons.isNotEmpty) ...[
                           const _SectionHeader(title: "Avatars"),
                           const SizedBox(height: 12),
-                          _ItemGrid(items: _icons, onBuy: _handleBuy, assetPrefix: 'assets/avatars'),
+                          _ItemGrid(
+                            items: _icons,
+                            onBuy: _handleBuy,
+                            assetPrefix: 'assets/avatars',
+                          ),
                           const SizedBox(height: 24),
                         ],
                         if (_frames.isNotEmpty) ...[
                           const _SectionHeader(title: "Frames"),
                           const SizedBox(height: 12),
-                          _ItemGrid(items: _frames, onBuy: _handleBuy, assetPrefix: 'assets/frames'),
+                          _ItemGrid(
+                            items: _frames,
+                            onBuy: _handleBuy,
+                            assetPrefix: 'assets/frames',
+                          ),
                           const SizedBox(height: 24),
                         ],
                         if (_nameColors.isNotEmpty) ...[
@@ -358,10 +399,7 @@ class _ShopCard extends StatelessWidget {
     }
     // PNG/image asset (avatar or frame)
     if (assetPrefix != null) {
-      return Image.asset(
-        '$assetPrefix/${item.detail}',
-        fit: BoxFit.contain,
-      );
+      return Image.asset('$assetPrefix/${item.detail}', fit: BoxFit.contain);
     }
     // SVG asset
     if (item.detail.endsWith('.svg')) {
@@ -382,4 +420,3 @@ class _ShopCard extends StatelessWidget {
     return value != null ? Color(value) : primary;
   }
 }
-

@@ -1,3 +1,27 @@
+/*
+File: setting.dart
+Description: UI page for configuring work and break durations used by the Pomodoro timer. It reads existing values from provider state, validates user input, and applies updated durations.
+Responsibilities:
+- Render editable work and break time fields.
+- Validate user-entered durations before saving.
+- Update timer settings, cancel active background timing, and navigate back to home.
+Dependencies:
+- flutter/material.dart
+- flutter/services.dart
+- provider
+- flutter_background_service
+- edudoro/providers/clock_setting_provider.dart
+- edudoro/background_service.dart
+- edudoro/components/ui/button.dart
+- edudoro/utils/toast.dart
+- edudoro/color.dart
+Lifecycle:
+- Initializes text controllers from provider values in initState.
+- Disposes controllers in dispose to release resources.
+Author: Chanakarn Palipol
+Course: Mobile Application Development Framework
+*/
+
 import 'package:edudoro/background_service.dart';
 import 'package:edudoro/color.dart';
 import 'package:edudoro/components/ui/button.dart';
@@ -8,7 +32,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:provider/provider.dart';
 
+/// Represents the settings page for Pomodoro work and break durations.
+///
+/// Fields:
+/// - [key]: Optional widget key used by the Flutter framework.
+///
+/// Usage:
+/// - Opened when the user wants to adjust timer configuration.
+/// - Persists updates through [ClockSettingProvider] and coordinates with
+///   background service behavior.
 class SettingPage extends StatefulWidget {
+  /// Creates a [SettingPage].
   const SettingPage({super.key});
 
   @override

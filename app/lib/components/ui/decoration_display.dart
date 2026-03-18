@@ -1,38 +1,41 @@
+/*
+File: decoration_display.dart
+Description: Reusable UI widget for rendering a profile avatar with an optional decorative frame overlay.
+Responsibilities:
+- Render avatar and frame image assets using decoration metadata.
+- Maintain consistent sizing and overlay alignment for profile visuals.
+- Provide a single presentation component for decoration previews.
+Dependencies:
+- flutter/material.dart
+- edudoro/types/decorations.dart
+Lifecycle:
+- Stateless widget lifecycle with rendering driven by input properties.
+- Rebuilds when parent updates decoration or sizing inputs.
+Author: Chanakarn Palipol
+Course: Mobile Application Development Framework
+*/
+
 import 'package:flutter/material.dart';
 import 'package:edudoro/types/decorations.dart';
 
-/// The `DecorationDisplay` widget renders an avatar surrounded by a frame.
+/// Renders a profile decoration preview with an optional avatar and frame.
 ///
-/// Both [avatar] and [frame] are optional. If only one is provided, only that
-/// asset is rendered.
-///
-/// The [detail] field of each [Decorations] object is used as the filename
-/// inside the corresponding asset folder:
-/// - Avatars → `assets/avatars/<detail>` (PNG)
-/// - Frames  → `assets/frames/<detail>`  (PNG)
+/// Fields:
+/// - [avatar]: Optional avatar decoration rendered at the center.
+/// - [frame]: Optional frame decoration rendered on top of the avatar.
+/// - [size]: Base width and height of the avatar display area.
+/// - [frameScale]: Scale multiplier applied to frame size relative to [size].
 ///
 /// Usage:
-/// ```dart
-/// DecorationDisplay(
-///   avatar: Decorations(type: DecorationType.icon, detail: "Avatar1.png"),
-///   frame: Decorations(type: DecorationType.frame, detail: "Frame1.png"),
-///   size: 80,
-/// );
-/// ```
-
+/// - Used in profile and decoration-related screens to visualize selected items.
+/// - Consumes [Decorations.detail] values to resolve asset file names.
 class DecorationDisplay extends StatelessWidget {
-  /// The avatar to render at the center.
   final Decorations? avatar;
-
-  /// The frame decoration to render on top, visually surrounding the avatar.
   final Decorations? frame;
-
-  /// The width and height of the widget in logical pixels. Defaults to 64.
   final double size;
-
-  /// How much larger the frame is relative to [size]. Defaults to 1.3 (30% bigger).
   final double frameScale;
 
+  /// Creates a [DecorationDisplay] with optional [avatar] and [frame].
   const DecorationDisplay({
     super.key,
     this.avatar,
