@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the loadSettings method from the ClockSettingProvider class, for the Dart programming language.">
+  <title>loadSettings method - ClockSettingProvider class - clock_setting_provider library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">edudoro</a></li>
+    <li><a href="../../providers_clock_setting_provider/">providers\clock_setting_provider.dart</a></li>
+    <li><a href="../../providers_clock_setting_provider/ClockSettingProvider-class.html">ClockSettingProvider</a></li>
+    <li class="self-crumb">loadSettings method</li>
+  </ol>
+  <div class="self-name">loadSettings</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="providers_clock_setting_provider&#47;ClockSettingProvider-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">loadSettings</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+<span class="name ">loadSettings</span>(<wbr>)
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Loads timer settings from secure storage and sets up listeners.</p>
+<p>Async nature: Retrieves permissions and saved timer values asynchronously from local storage.
+Failure modes: Falls back to default timer values if storage reads fail or no values are found.
+Side effects: Updates timer state, notifies listeners, and persists settings via background service invocation.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; loadSettings() async {
+  final storage = FlutterSecureStorage();
+
+  service.invoke(&quot;checkPermission&quot;);
+
+  service.on(&quot;time_left&quot;).listen((event) {
+    if (event == null) return;
+    if (event[&#39;value&#39;] == null) return;
+    _currentTime = event[&#39;value&#39;];
+    notifyListeners();
+  });
+
+  service.on(&quot;state_change&quot;).listen((event) {
+    if (event == null) return;
+    if (event[&#39;value&#39;] == null) return;
+    _currentState = event[&#39;value&#39;] == PomodoroState.work.toString()
+        ? PomodoroState.work
+        : PomodoroState.rest;
+    notifyListeners();
+  });
+
+  String? workTimeStr = await storage.read(key: &quot;work_time&quot;);
+  double? workTimeParsed = double.tryParse(
+    workTimeStr ?? (25 * 60).toString(),
+  );
+  if (workTimeParsed != null) {
+    _workTime = workTimeParsed;
+  }
+
+  String? restTimeStr = await storage.read(key: &quot;rest_time&quot;);
+  double? restTimeParsed = double.tryParse(
+    restTimeStr ?? (5 * 60).toString(),
+  );
+  if (restTimeParsed != null) {
+    _restTime = restTimeParsed;
+  }
+
+  service.invoke(&quot;setting&quot;, {&#39;workTime&#39;: _workTime, &#39;restTime&#39;: _restTime});
+
+  return true;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">edudoro</a></li>
+    <li><a href="../../providers_clock_setting_provider/">clock_setting_provider</a></li>
+    <li><a href="../../providers_clock_setting_provider/ClockSettingProvider-class.html">ClockSettingProvider</a></li>
+    <li class="self-crumb">loadSettings method</li>
+</ol>
+
+    <h5>ClockSettingProvider class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    edudoro
+      1.0.0+1
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
