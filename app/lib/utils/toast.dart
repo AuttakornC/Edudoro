@@ -1,13 +1,13 @@
-/// File: toast.dart
-///
-/// Description: Provides a utility function to display toast notifications in Edudoro.
-///
-/// Responsibilities:
-/// - Shows styled toast messages to the user.
-/// - Centralizes toast configuration for consistent UI feedback.
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
+/*
+ * File: toast.dart
+ * Description: Provides a utility function to display toast notifications in Edudoro.
+ * Responsibilities:
+ * - Shows styled toast messages to the user.
+ * - Centralizes toast configuration for consistent UI feedback.
+ * Notes: Utility file separating toast UI invocation from widgets.
+ * Author: Auttakorn Camsoi
+ * Course: Mobile Application Development Framework
+ */
 
 import 'package:edudoro/color.dart';
 import 'package:fluttertoast/fluttertoast.dart';

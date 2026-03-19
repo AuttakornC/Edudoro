@@ -1,14 +1,14 @@
-/// File: clock_setting_provider.dart
-///
-/// Description: Manages Pomodoro timer settings, state, and persistence for Edudoro.
-///
-/// Responsibilities:
-/// - Handles timer durations and state transitions.
-/// - Persists settings to secure storage.
-/// - Notifies listeners of state changes.
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
+/*
+ * File: clock_setting_provider.dart
+ * Description: Manages Pomodoro timer settings, state, and persistence for Edudoro.
+ * Responsibilities:
+ * - Handles timer durations and state transitions.
+ * - Persists settings to secure storage.
+ * - Notifies listeners of state changes.
+ * Notes: Separates Pomodoro state management from the UI. Contains asynchronous operations for secure storage and background tasks.
+ * Author: Auttakorn Camsoi
+ * Course: Mobile Application Development Framework
+ */
 
 import 'package:edudoro/background_service.dart';
 import 'package:edudoro/utils/toast.dart';
@@ -18,7 +18,16 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Provider for Pomodoro timer settings and state.
 ///
-/// Separates timer logic from UI and persists settings.
+/// Fields:
+/// - `service`: Instance of `FlutterBackgroundService`.
+/// - `_workTime`: Work session duration in seconds.
+/// - `_restTime`: Rest session duration in seconds.
+/// - `_currentTime`: Current time remaining in the active session.
+/// - `_isRunning`: Boolean indicating if the timer is actively counting down.
+/// - `_currentState`: Current phase of the Pomodoro timer.
+///
+/// Usage:
+/// - Used by widgets to observe timer state and dispatch timer control actions.
 class ClockSettingProvider extends ChangeNotifier {
   FlutterBackgroundService service = FlutterBackgroundService();
 
@@ -45,7 +54,9 @@ class ClockSettingProvider extends ChangeNotifier {
 
   /// Loads timer settings from secure storage and sets up listeners.
   ///
-  /// Side effects: Updates timer state, notifies listeners, and persists settings.
+  /// Async nature: Retrieves permissions and saved timer values asynchronously from local storage.
+  /// Failure modes: Falls back to default timer values if storage reads fail or no values are found.
+  /// Side effects: Updates timer state, notifies listeners, and persists settings via background service invocation.
   Future<bool> loadSettings() async {
     final storage = FlutterSecureStorage();
 

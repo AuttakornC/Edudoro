@@ -1,14 +1,17 @@
-/// File: home_coin.dart
-///
-/// Description: Displays the user's coin balance and provides access to the shop in the Edudoro home screen.
-///
-/// Responsibilities:
-/// - Shows the current coin count from [CoinProvider].
-/// - Provides a button to navigate to the shop page.
-/// - Uses consistent iconography and color styling.
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
+/*
+ * File: home_coin.dart
+ * Description: Displays the user's coin balance and provides access to the shop in the Edudoro home screen.
+ * Responsibilities:
+ * - Shows the current coin count from CoinProvider.
+ * - Provides a button to navigate to the shop page.
+ * - Uses consistent iconography and color styling.
+ * Dependencies:
+ * - Depends on CoinProvider to fetch the latest coin state.
+ * Lifecycle:
+ * - Reactively rebuilds whenever CoinProvider notifies changes.
+ * Author: Auttakorn Camsoi
+ * Course: Mobile Application Development Framework
+ */
 
 import 'package:edudoro/color.dart';
 import 'package:edudoro/components/util/svgIcon.dart';
@@ -18,7 +21,11 @@ import 'package:provider/provider.dart';
 
 /// A widget that displays the user's coin balance and a shop navigation button.
 ///
-/// Reads coin value from [CoinProvider] and updates automatically.
+/// Fields:
+/// - None
+///
+/// Usage:
+/// - Embedded in the [HomeFooter] to display current wealth and access the shop.
 class HomeCoin extends StatefulWidget {
   @override
   State<HomeCoin> createState() => _HomeCoinState();

@@ -1,12 +1,10 @@
-/// File: config.dart
-///
-/// Description: Defines global configuration constants for the Edudoro application.
-///
-/// Responsibilities:
-/// - Stores API endpoint base paths and other global settings.
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
+/*
+ * File: config.dart
+ * Description: Defines global configuration constants for the Edudoro application.
+ * Responsibilities: Stores API endpoint base paths and other global settings.
+ * Author: Auttakorn Camsoi
+ * Course: Mobile Application Development Framework
+ */
 
 /// The base URL for the Edudoro server API.
 ///

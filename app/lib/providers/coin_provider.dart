@@ -1,14 +1,14 @@
-/// File: coin_provider.dart
-///
-/// Description: Manages the user's coin balance and handles coin-related state changes for Edudoro.
-///
-/// Responsibilities:
-/// - Loads coin balance from the server.
-/// - Updates coin state and notifies listeners.
-/// - Handles authentication failures and error messaging.
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
+/*
+ * File: coin_provider.dart
+ * Description: Manages the user's coin balance and handles coin-related state changes for Edudoro.
+ * Responsibilities:
+ * - Loads coin balance from the server.
+ * - Updates coin state and notifies listeners.
+ * - Handles authentication failures and error messaging.
+ * Notes: Manages coin score UI state and performs asynchronous API calls.
+ * Author: Auttakorn Camsoi
+ * Course: Mobile Application Development Framework
+ */
 
 import 'dart:convert';
 
@@ -19,16 +19,22 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Provider for managing the user's coin balance.
 ///
-/// Separates coin logic from UI and handles server communication.
+/// Fields:
+/// - `_coin`: The user's current coin score.
+///
+/// Usage:
+/// - Provided globally to display and update the user's balance across different screens.
 class CoinProvider extends ChangeNotifier {
   int _coin = 0;
 
   /// The current coin balance.
   int get coin => _coin;
 
-  /// Loads the coin balance from the server.
+  /// Retrieves the coin balance from the server via HTTP.
   ///
-  /// Side effects: Updates coin state, handles authentication, and shows error messages.
+  /// Async nature: Fetches data asynchronously from the network.
+  /// Failure modes: Clears JWT token on 401 Unauthorized. Displays error toast and returns false if fetch fails or throws an exception.
+  /// Side effects: Updates internal coin state and notifies listeners on success.
   /// Returns true if successful, false otherwise.
   Future<bool> loadCoin() async {
     try {

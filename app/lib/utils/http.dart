@@ -1,14 +1,14 @@
-/// File: http.dart
-///
-/// Description: Provides HTTP utility functions for network requests in Edudoro.
-///
-/// Responsibilities:
-/// - Defines supported HTTP methods.
-/// - Handles authenticated and unauthenticated requests.
-/// - Serializes request bodies and manages headers.
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
+/*
+ * File: http.dart
+ * Description: Provides HTTP utility functions for network requests in Edudoro.
+ * Responsibilities:
+ * - Defines supported HTTP methods.
+ * - Handles authenticated and unauthenticated requests.
+ * - Serializes request bodies and manages headers.
+ * Notes: Separates network logic entirely from the UI. Contains async operations for network calls and secure storage access.
+ * Author: Auttakorn Camsoi
+ * Course: Mobile Application Development Framework
+ */
 
 import 'dart:convert';
 
@@ -19,19 +19,19 @@ import 'package:http/http.dart';
 /// Supported HTTP methods for network requests.
 enum HTTPMethod { post, get, put, delete, patch }
 
-/// Sends an HTTP request to the given [url] using the specified [method].
+/// Fetches data by sending an HTTP request to the given [url] using the specified [method].
 ///
+/// Async nature: Awaits secure storage read, then performs asynchronous HTTP calls.
+/// 
 /// If [withAuth] is true, includes a JWT token from secure storage in the Authorization header.
 ///
 /// [body] is encoded as JSON for POST, PUT, and PATCH requests.
 ///
 /// Returns the [Response] from the server.
 ///
-/// Throws an exception if the network request fails or the server is unreachable.
-///
 /// Failure modes:
 /// - Returns non-200 [Response] for server errors or authentication failures.
-/// - Throws if network is unavailable or request times out.
+/// - Throws exception if network is unavailable or request times out.
 Future<Response> fetch(
   String url,
   HTTPMethod method, {

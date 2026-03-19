@@ -1,15 +1,3 @@
-/// File: main.dart
-///
-/// Description: Entry point for the Edudoro application.
-///
-/// Responsibilities:
-/// - Initializes Flutter bindings and background services.
-/// - Sets up state management providers for clock, coin, and goal.
-/// - Launches the main application widget [RouteApp].
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
-
 import 'package:edudoro/background_service.dart';
 import 'package:edudoro/providers/clock_setting_provider.dart';
 import 'package:edudoro/providers/coin_provider.dart';

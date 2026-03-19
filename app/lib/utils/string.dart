@@ -1,14 +1,13 @@
-/// File: string.dart
-///
-/// Description: Provides string formatting utilities for time and date display in Edudoro.
-///
-/// Responsibilities:
-/// - Formats numbers with leading zeros.
-/// - Converts seconds to minute:second format.
-/// - Formats [DateTime] objects as strings.
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
+/*
+ * File: string.dart
+ * Description: Provides string formatting utilities for time and date display in Edudoro.
+ * Responsibilities:
+ * - Formats numbers with leading zeros.
+ * - Converts seconds to minute:second format.
+ * - Formats DateTime objects as strings.
+ * Author: Auttakorn Camsoi
+ * Course: Mobile Application Development Framework
+ */
 
 /// Returns a string representation of [value] padded with leading zeros to [width] digits.
 String padZero(int value, int width) {

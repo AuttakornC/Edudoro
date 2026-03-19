@@ -1,14 +1,18 @@
-/// File: home.dart
-///
-/// Description: Main entry UI for Edudoro, displaying timer, coin, goal, and navigation controls.
-///
-/// Responsibilities:
-/// - Provides the home screen layout and navigation.
-/// - Displays Pomodoro timer, coin balance, and goal progress.
-/// - Handles navigation to friend, profile, goal, and settings pages.
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
+/*
+ * File: home.dart
+ * Description: Main entry UI for Edudoro, displaying timer, coin, goal, and navigation controls.
+ * Responsibilities:
+ * - Provides the home screen layout and navigation.
+ * - Displays Pomodoro timer, coin balance, and goal progress.
+ * - Handles navigation to friend, profile, goal, and settings pages.
+ * Dependencies:
+ * - Depends on GoalProvider and CoinProvider for state.
+ * - Composes HomeClock and HomeCoin widgets for layout.
+ * Lifecycle:
+ * - Serves as the primary active screen while the user interacts with the timer.
+ * Author: Auttakorn Camsoi
+ * Course: Mobile Application Development Framework
+ */
 
 import 'package:edudoro/color.dart';
 import 'package:edudoro/components/pages/home/home_clock.dart';
@@ -20,7 +24,11 @@ import 'package:provider/provider.dart';
 
 /// The main home screen widget for Edudoro.
 ///
-/// Created via Navigator after loading completes.
+/// Fields:
+/// - None
+///
+/// Usage:
+/// - Displayed after successful app initialization and sign-in.
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -46,6 +54,12 @@ class HomePage extends StatelessWidget {
 }
 
 /// Custom app bar for the home screen, with navigation to friend and profile pages.
+///
+/// Fields:
+/// - None
+///
+/// Usage:
+/// - Used as the `AppBar` in [HomePage] scaffolding.
 class HomeAppBar extends AppBar {
   HomeAppBar({super.key, required BuildContext context})
     : super(
@@ -82,6 +96,12 @@ class HomeAppBar extends AppBar {
 }
 
 /// Footer widget for the home screen, with navigation to shop and settings.
+///
+/// Fields:
+/// - None
+///
+/// Usage:
+/// - Used at the bottom of the [HomePage] layout.
 class HomeFooter extends StatelessWidget {
   const HomeFooter({super.key});
 
@@ -104,6 +124,12 @@ class HomeFooter extends StatelessWidget {
 }
 
 /// Displays the user's goal progress and provides navigation to set new goals.
+///
+/// Fields:
+/// - None
+///
+/// Usage:
+/// - Placed in the [HomePage] to show goal status and link to the goal settings page.
 class HomeGoalButton extends StatefulWidget {
   const HomeGoalButton({super.key});
 

@@ -1,14 +1,14 @@
-/// File: goal_provider.dart
-///
-/// Description: Manages daily and tomorrow goal rounds for Edudoro, including persistence and state changes.
-///
-/// Responsibilities:
-/// - Loads and updates goal rounds from secure storage.
-/// - Handles logic for daily and tomorrow goals.
-/// - Notifies listeners of state changes.
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
+/*
+ * File: goal_provider.dart
+ * Description: Manages daily and tomorrow goal rounds for Edudoro, including persistence and state changes.
+ * Responsibilities:
+ * - Loads and updates goal rounds from secure storage.
+ * - Handles logic for daily and tomorrow goals.
+ * - Notifies listeners of state changes.
+ * Notes: Decouples goal-setting logic from views and manages asynchronous secure storage interactions.
+ * Author: Auttakorn Camsoi
+ * Course: Mobile Application Development Framework
+ */
 
 import 'package:edudoro/utils/string.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +16,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Provider for managing daily and tomorrow goal rounds.
 ///
-/// Separates goal logic from UI and handles persistence.
+/// Fields:
+/// - `_goalRound`: The target number of rounds for today.
+/// - `_tmrRound`: The target number of rounds for tomorrow.
+///
+/// Usage:
+/// - Used by goal management and display widgets to read or update the user's daily goals.
 class GoalProvider extends ChangeNotifier {
   int _goalRound = 0;
   int _tmrRound = 0;
@@ -27,9 +32,11 @@ class GoalProvider extends ChangeNotifier {
   /// The number of goal rounds for tomorrow.
   int get tmrRound => _tmrRound;
 
-  /// Loads goal rounds from secure storage and updates state.
+  /// Retrieves goal rounds from secure storage and updates state.
   ///
-  /// Side effects: Updates goal state, persists changes, and notifies listeners.
+  /// Async nature: Performs asynchronous reads and writes to local secure storage.
+  /// Failure modes: Initializes defaults to 0 if storage records are missing or unparseable.
+  /// Side effects: Updates goal state, persists changes for next day rollovers, and notifies listeners.
   Future<bool> loadGoal() async {
     final storage = FlutterSecureStorage();
 
@@ -105,6 +112,13 @@ class GoalProvider extends ChangeNotifier {
 }
 
 /// Stores goal round and date information for persistence.
+///
+/// Fields:
+/// - `round`: The number of rounds associated with the date.
+/// - `date`: The date string in "yyyy-mm-dd" format.
+///
+/// Usage:
+/// - Internal helper used by [GoalProvider] to format and parse storage strings.
 class GoalStorageInfo {
   int round;
   String date;

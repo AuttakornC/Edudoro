@@ -1,14 +1,15 @@
-/// File: route.dart
-///
-/// Description: Defines global navigation routes and navigation utilities for the Edudoro application.
-///
-/// Responsibilities:
-/// - Maps route names to page widgets for navigation.
-/// - Provides a global [NavigatorState] key for navigation control.
-/// - Offers utility methods for programmatic navigation.
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
+/*
+ * File: route.dart
+ * Description: Defines global navigation routes and navigation utilities for the Edudoro application.
+ * Responsibilities:
+ * - Maps route names to page widgets for navigation.
+ * - Provides a global NavigatorState key for navigation control.
+ * - Offers utility methods for programmatic navigation.
+ * Dependencies: Page widgets across the application.
+ * Lifecycle: Application root level, active throughout the app lifecycle.
+ * Author: Auttakorn Camsoi
+ * Course: Mobile Application Development Framework
+ */
 
 import 'package:edudoro/pages/avatar_change.dart';
 import 'package:edudoro/pages/friend.dart';
@@ -24,7 +25,13 @@ import 'package:edudoro/pages/sign_up.dart';
 import 'package:edudoro/theme.dart';
 import 'package:flutter/material.dart';
 
-/// The main application widget that sets up navigation and theming.
+/// A stateless widget that sets up navigation and theming for the app.
+///
+/// Fields:
+/// - None
+///
+/// Usage:
+/// - Serves as the root widget passed to `runApp()`.
 class RouteApp extends StatelessWidget {
   const RouteApp({super.key});
 
@@ -53,7 +60,13 @@ class RouteApp extends StatelessWidget {
   }
 }
 
-/// Provides global navigation utilities and a [NavigatorState] key.
+/// Provides global navigation utilities and a NavigatorState key.
+///
+/// Fields:
+/// - `key`: A global key used to interact with the app's Navigator directly via state without context.
+///
+/// Usage:
+/// - Call `Nav.goTo` from anywhere to push or replace routes.
 class Nav {
   static final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
 

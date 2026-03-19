@@ -1,13 +1,12 @@
-/// File: color.dart
-///
-/// Description: Defines color constants for the Edudoro application's design system.
-///
-/// Responsibilities:
-/// - Provides primary, secondary, and semantic color values.
-/// - Centralizes color definitions for consistent theming.
-///
-/// Author: Auttakorn Camsoi
-/// Course: Mobile Application Development Framework
+/*
+ * File: color.dart
+ * Description: Defines color constants for the Edudoro application's design system.
+ * Responsibilities:
+ * - Provides primary, secondary, and semantic color values.
+ * - Centralizes color definitions for consistent theming.
+ * Author: Auttakorn Camsoi
+ * Course: Mobile Application Development Framework
+ */
 
 import 'package:flutter/material.dart';
 
