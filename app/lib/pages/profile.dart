@@ -1,11 +1,14 @@
 /*
- * File: profile_page.dart
+ * File: profile.dart
  * Description: UI screen for displaying the authenticated user's profile,
  * including avatar, username, and email fetched from the backend API.
  *
  * Dependencies:
  * - flutter_secure_storage (JWT token management)
- * - edudoro/utils/http.dart (network requests)
+ * - edudoro/app/lib/utils/http.dart (network requests)
+ * - edudoro/app/lib/utils/toast.dart (error notifications)
+ * - edudoro/app/lib/components/ui/decoration_display.dart (avatar/frame rendering)
+ * - edudoro/app/lib/types/decorations.dart (Decorations model)
  *
  * Lifecycle:
  * - Created via Navigator
@@ -30,6 +33,10 @@ import 'package:edudoro/utils/toast.dart';
 /// Fields:
 /// - username: display name of the authenticated user
 /// - email: email address of the authenticated user
+/// - avatar: currently equipped avatar icon decoration
+/// - frame: currently equipped frame decoration
+/// - nameColor: color applied to the username text
+/// - isLoading: whether profile data is being fetched
 ///
 /// Usage:
 /// - Navigated to from the main bottom navigation bar
@@ -66,6 +73,8 @@ class _ProfilePageState extends State<ProfilePage> {
     Future.microtask(_loadUserInfo);
   }
 
+  /// Converts a hex color string (e.g. "#FF0000" or "FF0000") to a [Color].
+  /// Returns [primary] if parsing fails.
   Color _parseHexColor(String hex) {
     final cleaned = hex.replaceFirst('#', '');
     final value = int.tryParse(
@@ -75,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return value != null ? Color(value) : primary;
   }
 
-  /// Fetches the current user's username and email from [GET /api/v1/profile].
+  /// Fetches the current user's profile from [GET /api/v1/profile].
   ///
   /// This method performs a network request and may take time to complete.
   /// Shows a toast message if the request fails or the server returns an error.
@@ -118,6 +127,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Logs the user out and clears all local session data.
+  ///
+  /// Parameters:
+  /// - [context]: used to perform navigation after logout
   ///
   /// Side effects:
   /// - Removes JWT token from secure storage

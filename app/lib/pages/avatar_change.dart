@@ -1,10 +1,12 @@
 /*
- * File: avatar_change_page.dart
+ * File: avatar_change.dart
  * Description: UI screen for selecting and applying owned decorations
  * including avatars, frames, and name colors to the user's profile.
  *
  * Dependencies:
- * - edudoro/utils/http.dart (network requests)
+ * - edudoro/app/lib/utils/http.dart (network requests)
+ * - edudoro/app/lib/utils/toast.dart (error notifications)
+ * - edudoro/app/lib/color.dart (app color constants)
  *
  * Lifecycle:
  * - Created via Navigator from ProfilePage
@@ -21,12 +23,18 @@ import 'package:edudoro/utils/http.dart';
 import 'package:edudoro/utils/toast.dart';
 import 'package:flutter/material.dart';
 
+/// Internal model representing a single owned decoration item.
+///
+/// Fields:
+/// - decorationId: unique identifier used when applying the decoration
+/// - detail: asset path or hex color string used for rendering
 class _DecorationItem {
   final String decorationId;
   final String detail;
 
   _DecorationItem({required this.decorationId, required this.detail});
 
+  /// Creates a [_DecorationItem] from a JSON map returned by the API.
   factory _DecorationItem.fromJson(Map<String, dynamic> json) =>
       _DecorationItem(
         decorationId: json['decoration_id'] as String,
@@ -34,6 +42,21 @@ class _DecorationItem {
       );
 }
 
+/// The [AvatarChangePage] allows the user to browse and select owned
+/// decorations (avatars, frames, name colors) to apply to their profile.
+///
+/// Fields:
+/// - icons: list of owned avatar icon decorations
+/// - frames: list of owned frame decorations
+/// - nameColors: list of owned name color decorations
+/// - isLoading: whether decorations are currently being fetched
+/// - selectedIconId: decoration_id of the currently selected avatar
+/// - selectedFrameId: decoration_id of the currently selected frame
+/// - selectedNameColorId: decoration_id of the currently selected name color
+///
+/// Usage:
+/// - Navigated to from ProfilePage via "/avatar_change"
+/// - On save, applies selected decorations to the server and returns
 class AvatarChangePage extends StatefulWidget {
   const AvatarChangePage({super.key});
 
@@ -42,13 +65,25 @@ class AvatarChangePage extends StatefulWidget {
 }
 
 class _AvatarChangePageState extends State<AvatarChangePage> {
+  /// List of owned avatar icon decorations.
   List<_DecorationItem> _icons = [];
+
+  /// List of owned frame decorations.
   List<_DecorationItem> _frames = [];
+
+  /// List of owned name color decorations.
   List<_DecorationItem> _nameColors = [];
+
+  /// Whether the decoration data is currently being fetched.
   bool _isLoading = false;
 
+  /// The decoration_id of the currently selected avatar icon.
   String? _selectedIconId;
+
+  /// The decoration_id of the currently selected frame.
   String? _selectedFrameId;
+
+  /// The decoration_id of the currently selected name color.
   String? _selectedNameColorId;
 
   @override
@@ -95,7 +130,10 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
     setState(() => _isLoading = false);
   }
 
-  /// Saves the selected decorations by calling [PATCH /api/v1/profile/use].
+  /// Saves the selected decorations by calling [PATCH /api/v1/profile/use] for each.
+  ///
+  /// Only sends requests for decoration types that have a new selection.
+  /// Does nothing if no decoration has been selected.
   ///
   /// Side effects:
   /// - Updates the active icon, frame, or name color on the server
@@ -137,6 +175,8 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
     }
   }
 
+  /// Converts a hex color string (e.g. "#FF0000" or "FF0000") to a [Color].
+  /// Returns [primary] if parsing fails.
   Color _parseHexColor(String hex) {
     final cleaned = hex.replaceFirst('#', '');
     final value = int.tryParse(
@@ -146,6 +186,15 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
     return value != null ? Color(value) : primary;
   }
 
+  /// Builds a preview widget for a decoration item.
+  ///
+  /// Parameters:
+  /// - [detail]: asset filename or hex color string
+  /// - [assetPrefix]: optional asset folder path; if provided renders an image
+  ///
+  /// Returns an image widget for asset-based decorations,
+  /// a colored circle for hex color decorations,
+  /// or a fallback icon if neither applies.
   Widget _buildPreview(String detail, {String? assetPrefix}) {
     if (assetPrefix != null) {
       return Image.asset(
@@ -176,6 +225,13 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
     );
   }
 
+  /// Builds a selectable card widget for a single decoration item.
+  ///
+  /// Parameters:
+  /// - [item]: the decoration item to display
+  /// - [selected]: whether this card is currently selected
+  /// - [onTap]: callback invoked when the card is tapped
+  /// - [assetPrefix]: optional asset folder path passed to [_buildPreview]
   Widget _card({
     required _DecorationItem item,
     required bool selected,
@@ -201,6 +257,15 @@ class _AvatarChangePageState extends State<AvatarChangePage> {
     );
   }
 
+  /// Builds a 3-column grid of selectable decoration cards.
+  ///
+  /// Parameters:
+  /// - [items]: list of decoration items to display
+  /// - [selectedId]: decoration_id of the currently selected item
+  /// - [onSelect]: callback invoked with the decoration_id when a card is tapped
+  /// - [assetPrefix]: optional asset folder path passed to each [_card]
+  ///
+  /// Shows an empty state message if [items] is empty.
   Widget _grid({
     required List<_DecorationItem> items,
     required String? selectedId,
