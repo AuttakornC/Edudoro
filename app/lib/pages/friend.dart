@@ -33,18 +33,6 @@ import '../components/ui/decoration_display.dart';
 // Types
 import '../types/friends.dart';
 
-// mock data for add friend form
-// var mockUserData = [
-//   {"id": 1, "username": "Alice5", "score": 1500, "status": "Online"},
-//   {"id": 2, "username": "Bob444", "score": 1200, "status": "Offline"},
-//   {"id": 3, "username": "Charlie", "score": 1800, "status": "Online"},
-//   {"id": 4, "username": "David1", "score": 1100, "status": "Offline"},
-//   {"id": 5, "username": "Eve333", "score": 1300, "status": "Online"},
-//   {"id": 6, "username": "Frank2", "score": 1400, "status": "Offline"},
-//   {"id": 7, "username": "Grace2", "score": 1600, "status": "Online"},
-//   {"id": 8, "username": "Heidi2", "score": 1700, "status": "Offline"},
-// ];
-
 /// The `FriendPage` widget is the main entry point for the friends feature.
 class FriendPage extends StatelessWidget {
   const FriendPage({super.key});
@@ -85,7 +73,7 @@ class FriendPageView extends StatefulWidget {
   State<StatefulWidget> createState() => _FriendPageView();
 }
 
-/// The `_FriendPageView` class is the stateful implementation of the `FriendPageView` widget.
+/// The `_FriendPageView` class is the stateful implementation of the [FriendPageView] widget.
 ///
 /// It manages the state for the friends list, friend requests, loading states, and user interactions such as accepting/rejecting friend requests and adding new friends.
 /// Also index of the currently selected tab (friends list or friend requests) is managed here to switch between the two views.
@@ -269,12 +257,12 @@ class _FriendPageView extends State<FriendPageView> {
 /// Both components handle loading states and display appropriate messages when the lists are empty.
 ///
 /// Fields:
-/// friends: A list of [FriendsType] objects representing the user's friends.
-/// isLoading: A boolean indicating whether the friends list is currently being loaded.
-/// onUnfriendHandler: A callback function that is called when a user is unfriended,
-/// allowing the parent widget to refresh the lists.
-/// onRefreshFriends: A callback function that is called to refresh the friends list when user pulls to refresh,
-/// allowing the parent widget to fetch the latest data from the API.
+/// - friends: A list of [FriendsType] objects representing the user's friends.
+/// - isLoading: A boolean indicating whether the friends list is currently being loaded.
+/// - onUnfriendHandler: A callback function that is called when a user is unfriended,
+///   allowing the parent widget to refresh the lists.
+/// - onRefreshFriends: A callback function that is called to refresh the friends list when user pulls to refresh,
+///   allowing the parent widget to fetch the latest data from the API.
 class FriendList extends StatelessWidget {
   /// A list of [FriendsType] objects representing the user's friends.
   final List<FriendsType> friends;
@@ -297,6 +285,12 @@ class FriendList extends StatelessWidget {
   });
 
   /// Unfriends a user by sending a DELETE request to the API with the friend's account ID.
+  ///
+  /// On success, it displays a success message and calls the [onUnfriendHandler] callback to refresh the lists.
+  ///
+  /// On failure, it displays an error message with details from the API response.
+  ///
+  /// The method makes a DELETE request to the "/friends/{friendAccountId}" endpoint, where `{friendAccountId}` is the ID of the friend to be unfriended.
   Future<void> _unfriend(String friendAccountId) async {
     try {
       final response = await fetch(
@@ -398,12 +392,12 @@ class FriendList extends StatelessWidget {
 /// It also handles loading states and displays appropriate messages when the list is empty.
 ///
 /// Fields:
-/// friendRequests: A list of [FriendsRequestType] objects representing the user's friend requests.
-/// isLoading: A boolean indicating whether the friend requests list is currently being loaded.
-/// onRequestHandled: A callback function that is called after a friend request is accepted or rejected,
-/// allowing the parent widget to refresh the lists.
-/// onRefreshFriendRequests: A callback function that is called to refresh the friend requests list when user pulls to refresh,
-/// allowing the parent widget to fetch the latest data from the API.
+/// - friendRequests: A list of [FriendsRequestType] objects representing the user's friend requests.
+/// - isLoading: A boolean indicating whether the friend requests list is currently being loaded.
+/// - onRequestHandled: A callback function that is called after a friend request is accepted or rejected,
+///   allowing the parent widget to refresh the lists.
+/// - onRefreshFriendRequests: A callback function that is called to refresh the friend requests list when user pulls to refresh,
+///   allowing the parent widget to fetch the latest data from the API.
 class FriendRequestList extends StatelessWidget {
   /// A list of [FriendsRequestType] objects representing the user's friend requests.
   final List<FriendsRequestType> friendRequests;
@@ -577,6 +571,7 @@ class FriendRequestList extends StatelessWidget {
 /// The `AddFriendForm` widget is a dialog that allows users to search for other users by username and send friend requests.
 /// It includes a text field for entering the username, and displays search results in a list below the text field.
 ///
+/// Usage:
 /// Users can tap on a search result to select it, and then tap the "Add" button to send a friend request to the selected user.
 /// The form also handles loading states and displays appropriate messages when no users are found or when the search input is invalid.
 class AddFriendForm extends StatefulWidget {
@@ -780,6 +775,8 @@ class _AddFriendForm extends State<AddFriendForm> {
                       child: ListTile(
                         selectedColor: primary,
                         selected: user.friend_id == _selectedUserId,
+                        // If the user has an icon or frame decoration,
+                        // display it. Otherwise, display a default avatar with the first letter of the username.
                         leading:
                             user.decorations
                                         ?.where(

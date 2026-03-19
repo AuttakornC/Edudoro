@@ -24,13 +24,10 @@ import 'package:edudoro/types/decorations.dart';
 /// - friend_account_id: The unique identifier for the friend's account.
 /// - username: The username of the friend.
 /// - daily_score: The daily score of the friend.
-/// - decorations: A list of decorations associated with the friend (optional). //TODO(4KV6): Make it non-optional after API update.
+/// - decorations: A list of decorations associated with the friend (optional).
 /// - friend_at: The date and time when the friendship was established (optional).
 ///
 /// Usage:
-/// ```dart
-/// final friend = FriendsType.fromJson(jsonData);
-/// ```
 /// - The [fromJson] factory constructor allows creating a `FriendsType` instance from a JSON map,
 /// which is useful for parsing API responses.
 class FriendsType {
@@ -59,6 +56,14 @@ class FriendsType {
 
   /// Factory constructor to create a `FriendsType` instance from a JSON map.
   /// This is typically used to parse API responses into Dart objects.
+  ///
+  /// The method takes a JSON map as input and extracts the relevant fields to create an instance of [FriendsType].
+  /// It also handles the parsing of the [decorations] field, which is a list of decoration items, and the [friend_at] field, which is parsed into a [DateTime] object if it is present in the JSON.
+  ///
+  /// Usage:
+  /// ```dart
+  /// final friend = FriendsType.fromJson(jsonData);
+  /// ```
   factory FriendsType.fromJson(Map<String, dynamic> json) {
     // if (kDebugMode) {
     //   print("Parsing FriendsType from JSON: $json");
@@ -85,9 +90,6 @@ class FriendsType {
 /// - decorations: A list of decorations associated with the requester (optional).
 ///
 /// Usage:
-/// ```dart
-/// final friendRequest = FriendsRequestType.fromJson(jsonData);
-/// ```
 /// - The [fromJson] factory constructor allows creating a `FriendsRequestType` instance from a JSON map,
 /// which is useful for parsing API responses.
 class FriendsRequestType {
@@ -108,6 +110,14 @@ class FriendsRequestType {
 
   /// Factory constructor to create a `FriendsRequestType` instance from a JSON map.
   /// This is typically used to parse API responses into Dart objects.
+  ///
+  /// The method takes a JSON map as input and extracts the relevant fields to create an instance of [FriendsRequestType].
+  /// It also handles the parsing of the [decorations] field, which is a list of decoration items.
+  ///
+  /// Usage:
+  /// ```dart
+  /// final friendRequest = FriendsRequestType.fromJson(jsonData);
+  /// ```
   factory FriendsRequestType.fromJson(Map<String, dynamic> json) {
     return FriendsRequestType(
       requester_id: json['requester_id'] as String,
@@ -127,9 +137,6 @@ class FriendsRequestType {
 /// - decorations: A list of decorations associated with the friend (optional).
 ///
 /// Usage:
-/// ```dart
-/// final searchResult = FriendsSearchResultType.fromJson(jsonData);
-/// ```
 /// - The [fromJson] factory constructor allows creating a `FriendsSearchResultType` instance from a JSON map,
 /// which is useful for parsing API responses when searching for friends.
 class FriendsSearchResultType {
@@ -150,6 +157,14 @@ class FriendsSearchResultType {
 
   /// Factory constructor to create a `FriendsSearchResultType` instance from a JSON map.
   /// This is typically used to parse API responses into Dart objects when searching for friends.
+  ///
+  /// The method takes a JSON map as input and extracts the relevant fields to create an instance of [FriendsSearchResultType].
+  /// It also handles the parsing of the [decorations] field, which is a list of decoration items.
+  ///
+  /// Usage:
+  /// ```dart
+  /// final searchResult = FriendsSearchResultType.fromJson(jsonData);
+  /// ```
   factory FriendsSearchResultType.fromJson(Map<String, dynamic> json) {
     return FriendsSearchResultType(
       friend_id: json['friend_id'] as String,

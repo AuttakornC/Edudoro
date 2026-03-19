@@ -12,7 +12,6 @@ Course: Mobile Application Development Frameworks
 */
 
 /// Defines the types of decorations that can be applied to avatar.
-
 enum DecorationType {
   /// The icon decoration type allows users to customize the icon displayed on their avatar, such as a badge or symbol.
   icon,
@@ -32,14 +31,6 @@ enum DecorationType {
 /// - detail: The specific detail of the decoration (e.g., icon name, frame style, or color code).
 ///
 /// Usage:
-/// ```dart
-/// final decoration = Decorations(
-///   type: DecorationType.icon,
-///   detail: "star_icon",
-/// );
-///
-/// final decorationFromJson = Decorations.fromJson(APIResponseBodyJson);
-/// ```
 /// - The [fromJson] factory constructor allows creating a `Decorations` instance from a JSON map,
 /// which is useful for parsing API responses.
 class Decorations {
@@ -53,6 +44,14 @@ class Decorations {
 
   /// Factory constructor to create a `Decorations` instance from a JSON map.
   /// This is typically used to parse API responses into Dart objects.
+  ///
+  /// The method takes a JSON map as input and extracts the relevant fields to create an instance of [Decorations].
+  /// It also includes error handling to ensure that the required fields are present and correctly typed in the JSON input. If the JSON structure does not match the expected format, it may throw an error during parsing.
+  ///
+  /// Usage:
+  /// ```dart
+  /// final decoration = Decorations.fromJson(jsonData);
+  /// ```
   factory Decorations.fromJson(Map<String, dynamic> json) {
     return Decorations(
       type: _parseDecorationType(json['type'] as String),
@@ -61,6 +60,9 @@ class Decorations {
   }
 
   /// Helper method to parse the decoration type from a string.
+  ///
+  /// Throws an [ArgumentError] if the decoration type is unknown.
+  /// This method is used internally by the [fromJson] factory constructor to convert the string representation of the decoration type into the corresponding [DecorationType] enum value.
   static DecorationType _parseDecorationType(String json) {
     switch (json) {
       case 'icon':
