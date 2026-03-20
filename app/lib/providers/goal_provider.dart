@@ -1,11 +1,14 @@
 /*
  * File: goal_provider.dart
  * Description: Manages daily and tomorrow goal rounds for Edudoro, including persistence and state changes.
+ * 
  * Responsibilities:
  * - Loads and updates goal rounds from secure storage.
  * - Handles logic for daily and tomorrow goals.
  * - Notifies listeners of state changes.
+ * 
  * Notes: Decouples goal-setting logic from views and manages asynchronous secure storage interactions.
+ * 
  * Author: Auttakorn Camsoi
  * Course: Mobile Application Development Framework
  */
@@ -23,7 +26,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// Usage:
 /// - Used by goal management and display widgets to read or update the user's daily goals.
 class GoalProvider extends ChangeNotifier {
+  /// The target number of rounds for today.
   int _goalRound = 0;
+
+  /// The target number of rounds for tomorrow.
   int _tmrRound = 0;
 
   /// The number of goal rounds for today.
@@ -120,7 +126,10 @@ class GoalProvider extends ChangeNotifier {
 /// Usage:
 /// - Internal helper used by [GoalProvider] to format and parse storage strings.
 class GoalStorageInfo {
+  /// The number of rounds associated with the date.
   int round;
+
+  /// The date string in "yyyy-mm-dd" format.
   String date;
 
   GoalStorageInfo({required this.round, required this.date});

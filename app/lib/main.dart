@@ -1,3 +1,16 @@
+/*
+* File: main.dart
+* Description: Application entry point.
+*              Initializes the Flutter framework and launches the root widget.
+*
+* Notes:
+* - Contains global app configuration
+* - Should remain lightweight
+*
+* Author: Auttakorn Camsoi
+* Course: Mobile Application Development Framework
+*/
+
 import 'package:edudoro/background_service.dart';
 import 'package:edudoro/providers/clock_setting_provider.dart';
 import 'package:edudoro/providers/coin_provider.dart';

@@ -17,12 +17,27 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 
 /// Supported HTTP methods for network requests.
-enum HTTPMethod { post, get, put, delete, patch }
+enum HTTPMethod { 
+  /// Creates a new resource on the server.
+  post,
+
+  /// Retrieves a resource from the server.
+  get,
+
+  /// Replaces an existing resource on the server.
+  put,
+
+  /// Deletes a resource from the server.
+  delete,
+
+  /// Partially updates an existing resource on the server.
+  patch
+}
 
 /// Fetches data by sending an HTTP request to the given [url] using the specified [method].
 ///
 /// Async nature: Awaits secure storage read, then performs asynchronous HTTP calls.
-/// 
+///
 /// If [withAuth] is true, includes a JWT token from secure storage in the Authorization header.
 ///
 /// [body] is encoded as JSON for POST, PUT, and PATCH requests.

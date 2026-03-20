@@ -30,9 +30,16 @@ import 'package:edudoro/types/decorations.dart';
 /// - Used in profile and decoration-related screens to visualize selected items.
 /// - Consumes [Decorations.detail] values to resolve asset file names.
 class DecorationDisplay extends StatelessWidget {
+  /// Optional avatar decoration rendered at the center.
   final Decorations? avatar;
+
+  /// Optional frame decoration rendered on top of the avatar.
   final Decorations? frame;
+
+  /// Base width and height of the avatar display area.
   final double size;
+
+  /// Scale multiplier applied to frame size relative to [size].
   final double frameScale;
 
   /// Creates a [DecorationDisplay] with optional [avatar] and [frame].

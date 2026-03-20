@@ -1,12 +1,15 @@
 /*
  * File: background_service.dart
  * Description: Manages background services, notifications, and Pomodoro timer logic for Edudoro.
+ * 
  * Responsibilities:
  * - Initializes and configures background services.
  * - Handles notification permissions and delivery.
  * - Manages Pomodoro timer state and transitions.
  * - Provides audio and vibration feedback.
+ * 
  * Notes: Strictly separates timer logic from UI. Utilizes asynchronous operations extensively for timers, audio, and background tasks.
+ * 
  * Author: Auttakorn Camsoi
  * Course: Mobile Application Development Framework
  */
@@ -77,9 +80,16 @@ void onStart(ServiceInstance service) async {
 /// Usage:
 /// - Instantiated by [ClockManager] to manage permissions and deliver audio/visual alerts.
 class FlutterNoti {
+  /// The plugin instance managing local notifications.
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+  /// Configuration details for the notification channel.
   late NotificationDetails platformChannelSpecifics;
+
+  /// Audio player for sound playback.
   AudioPlayer player = AudioPlayer();
+
+  /// Boolean flag indicating if notification permissions are granted.
   bool isAllow = false;
 
   /// Checks and requests notification permissions from the user.
@@ -181,7 +191,13 @@ class FlutterNoti {
 }
 
 /// Represents the Pomodoro timer state.
-enum PomodoroState { work, rest }
+enum PomodoroState {
+  /// User working state
+  work,
+
+  /// User resting state
+  rest,
+}
 
 /// Manages Pomodoro timer logic, state transitions, and notification integration.
 ///
@@ -198,13 +214,28 @@ enum PomodoroState { work, rest }
 /// Usage:
 /// - Created in background event handler to manage the timer and stream updates back to UI.
 class ClockManager {
+  /// The current Phase of [PomodoroState]
   PomodoroState state = PomodoroState.work;
+
+  /// Duration of work session in seconds.
   int work = 0;
+
+  /// Duration of rest session in seconds.
   int rest = 0;
+
+  /// Remaining seconds in the active session.
   int currentTime = 0;
+
+  /// The active [Timer] instance for countdown.
   Timer? timer;
+
+  /// The [FlutterNoti] instance for sending notifications.
   FlutterNoti noti = FlutterNoti();
+
+  /// Callback invoked when transitioning states.
   Function(PomodoroState)? onStateChange;
+
+  /// Callback invoked every second during countdown.
   Function(int)? tickCallback;
 
   /// Sets the timer duration for the given [timer] state.

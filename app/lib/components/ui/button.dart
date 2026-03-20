@@ -1,13 +1,13 @@
 /*
  * File: button.dart
  * Description: Defines a reusable Button widget for consistent UI actions in Edudoro.
- * Responsibilities:
- * - Provides a customizable button with label, color, and shape options.
- * - Centralizes button styling for the design system.
+ * 
  * Dependencies:
  * - Depends on standard Flutter material libraries.
+ * 
  * Lifecycle:
  * - Stateless widget that rebuilds when its parent rebuilds or theme changes.
+ * 
  * Author: Auttakorn Camsoi
  * Course: Mobile Application Development Framework
  */
@@ -17,19 +17,28 @@ import 'package:flutter/material.dart';
 /// A reusable button widget with customizable label, color, and shape.
 ///
 /// Fields:
-/// - `label`: The text displayed on the button.
-/// - `onPressed`: Callback function triggered when the button is tapped.
-/// - `backgroundColor`: Optional custom background color.
-/// - `textStyle`: Optional custom text styling.
-/// - `shape`: Optional custom border shape.
+/// - label: The text displayed on the button.
+/// - onPressed: Callback function triggered when the button is tapped.
+/// - backgroundColor: Optional custom background color.
+/// - textStyle: Optional custom text styling.
+/// - shape: Optional custom border shape.
 ///
 /// Usage:
-/// - Use [Button] for primary and secondary actions throughout the app.
+/// - Use for primary and secondary actions throughout the app.
 class Button extends StatelessWidget {
+  /// The text displayed on the button.
   final String label;
+
+  /// Callback function triggered when the button is tapped.
   final VoidCallback onPressed;
+
+  /// Optional custom background color.
   final Color? backgroundColor;
+
+  /// Optional custom text styling.
   final TextStyle? textStyle;
+
+  /// Optional custom border shape.
   final OutlinedBorder? shape;
 
   const Button({
